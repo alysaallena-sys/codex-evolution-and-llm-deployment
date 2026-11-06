@@ -1,53 +1,53 @@
-# 大模型落地：方法、可恢复操作与候选准入
+# Putting LLMs into Practice: Methods, Recoverable Operations, and Candidate Admission
 
-整理日期：2026-11-06。本文集覆盖 2026 年 10 月至 11 月初的历史学习与本地验证。它保留成功结果，也保留检查器漏检、依赖失败和没有完成的验收。
+Compilation date: 2026-11-06. This collection covers historical learning and local validation from 2026-10 through early 2026-11. It retains successful results, missed detections, dependency failures, and incomplete acceptance checks.
 
-这里的“采用”有明确范围：把方法写入工作流程、把候选条件写入准入说明、完成文件归档，分别属于不同结果。它们都不能自动证明某个模型已经部署或某项服务可以上线。本次编写只做原件核对与公开稿整理，没有重跑模型、恢复旧服务或发布部署。
+“Adoption” has a specific scope here. Adding a method to a workflow, documenting candidate admission conditions, and completing a file archive are distinct outcomes. None of these outcomes alone proves model deployment or service readiness. This compilation checked original records and prepared public documents. It did not rerun models, restore old services, or publish a deployment.
 
-## 阅读导航
+## Reading guide
 
-| 文档 | 解决的问题 | 主要证据层级 |
+| Document | Question addressed | Main evidence level |
 | --- | --- | --- |
-| [工程方法与机制图](engineering-and-diagrams.md) | 如何固定任务、选择工具、设计独立预期，并防止图形检查器漏检 | 历史方法采用、静态检查、有限合成与人工验收 |
-| [本地模型与引擎准入](local-engine-admission.md) | 如何区分安装、配置、真实运行；如何审查来源、版本、平台与内容出口 | 历史资产审查、固定版本来源研究、候选知识采用 |
-| [可恢复模型归档](recoverable-model-archive.md) | 如何在释放空间前保留可验证、可拒绝错误覆盖的恢复路径 | 历史真实文件I/O、全量归档校验、恢复夹具与空间观测 |
-| [远端网关准入](remote-gateway-admission.md) | 如何识别共享配额、失败成本、真实模型身份和日志边界 | 固定源码及官方资料审查的继承结论、条目静态读回 |
+| [Engineering methods and mechanism diagrams](engineering-and-diagrams.md) | How to fix the task scope, select tools, define independent expected results, and prevent diagram checkers from missing objects | Historical method adoption, static checks, limited synthetic checks, and manual acceptance checks |
+| [Local model and engine admission](local-engine-admission.md) | How to distinguish installation, configuration, and actual execution; how to review sources, versions, platforms, and content destinations | Historical asset review, source research at fixed versions, and adoption of candidate screening knowledge |
+| [Recoverable model archive](recoverable-model-archive.md) | How to retain a verifiable recovery path that rejects incorrect overwrites before releasing disk space | Historical operations on real files, full archive verification, recovery fixtures, and disk space observations |
+| [Remote gateway admission](remote-gateway-admission.md) | How to identify shared quotas, failure costs, actual model identity, and logging limits | Inherited findings from fixed source code and official documentation reviews, plus static readback of documented entries |
 
-## 从早期到近期，形成了哪些成果
+## Outcomes across the historical work
 
-1. **工程任务先固定验收。** 学习工程方法后，实际采用限定范围、独立预期、分阶段执行和读回。机制图验证暴露了“退出码成功但未识别连线”的问题，因此增加了对象覆盖率门槛。
-2. **模型审查不止看名称。** 本地资产审查把“文件存在”“配置存在”“服务存在”“实际结果”分开。历史候选选择还说明，模型能够载入不代表依赖版本和计算路径正确。
-3. **空间释放需要恢复证据。** 一次模型冷归档完成分片、两轮全量校验、源文件释放门禁与删除后读回。它证明了该次文件处理结果，没有证明未来真实模型恢复或推理一定成功。
-4. **源研究可以形成有界方法。** Mage 研究促成结构化文件工具与 GUI 的任务分工，并限制跨工具配置的速度归因。后续有限情景检查没有升级成运行或产品验收。
-5. **候选引擎逐项准入。** FreeToken 保留为 `KEEP_BASE`；SIE 只采用候选筛选知识。平台声明、权重 revision、服务默认值和代码许可需要分别核对。
-6. **远端网关另有费用与身份边界。** 网关不是本地权重。成功请求账本不是服务商账单；多个 key 不是多份共享额度；模型别名不是实际模型来源证明。
+1. **Define acceptance conditions before engineering work.** The engineering method study led to bounded scope, independent expected results, staged execution, and readback. Diagram validation exposed a successful exit code despite no detected connections. The workflow therefore added an object coverage requirement.
+2. **Review more than model names.** The local asset review distinguished file existence, configuration existence, service existence, and actual results. Historical candidate selection also showed that loading a model does not prove correct dependency versions or computation paths.
+3. **Require recovery evidence before releasing space.** One model archive operation completed splitting, two full verification passes, a source deletion gate, and readback after deletion. It established the result of that file operation. It did not guarantee future restoration of real models or successful inference.
+4. **Source research can produce methods with a defined scope.** Mage research informed the division of work between structured file tools and GUI tools. It also limited speed claims across different tool configurations. Later scenario checks did not establish runtime or product acceptance.
+5. **Assess each candidate engine separately.** FreeToken retained the `KEEP_BASE` decision. SIE contributed candidate screening knowledge only. Platform claims, weight revisions, service defaults, and code licenses require separate checks.
+6. **Remote gateways add cost and identity questions.** A gateway does not supply local weights. A successful request ledger does not constitute a provider bill. Multiple keys do not create multiple shared quotas. A model alias does not establish the actual model source.
 
-## 如何阅读“已验证”
+## How to read “verified”
 
-| 标签 | 本文集如何使用 | 不得外推的结论 |
+| Label | Use in this collection | Conclusion it does not support |
 | --- | --- | --- |
-| 来源主张 | 作者文档、模型卡、固定源码或已保留的来源审查 | 不能直接当作本机测量 |
-| 静态检查 | 文件、哈希、结构、引用、条目内容和语法 | 不能证明交互或实际运行 |
-| 合成检查 | 受控夹具、故障反例、情景决策 | 不能覆盖所有设备、输入和应用 |
-| 本地真实运行 | 明确完成的文件操作或任务实例 | 文件I/O成功不等于模型推理成功 |
-| 设备验收 | 指定真实设备上的实际行为 | 没有原件就不声明通过 |
-| 发布验收 | 已发布产物和实际入口读回 | 写完文档或生成构建不等于发布 |
+| Source claim | Author documentation, model cards, fixed source code, or retained source reviews | A local measurement |
+| Static check | Files, hashes, structure, references, entry contents, and syntax | Interaction or actual execution |
+| Synthetic check | Controlled fixtures, deliberate failure cases, and scenario decisions | Coverage of all devices, inputs, and applications |
+| Actual local execution | Explicitly completed file operations or task instances | Successful file I/O does not establish successful model inference |
+| Device acceptance | Actual behavior on a specified physical device | A pass without supporting original records |
+| Publication acceptance | A published artifact and readback from its actual entry point | Finished documentation or a generated build does not establish publication |
 
-每篇正文写明观察日期、固定版本、适用条件和未验范围。浮动模型卡或服务商资料只作历史导航；它们不构成当前可用额度、价格或最佳模型保证。
+Each article states its observation date, fixed version, applicable conditions, and unverified scope. Unpinned model cards and provider documents serve as historical navigation only. They do not guarantee current quotas, prices, or the best model choice.
 
-## 复用时的最小步骤
+## Minimum steps for reuse
 
-1. 声明要改变的行为，以及本次不涉及的资源。
-2. 固定输入、初态、工具权限、代码与模型版本。
-3. 保存可恢复基线，再执行已授权的限定动作。
-4. 分别检查内容、实际显示、交互和持久化。
-5. 核对检查器究竟识别了多少对象。零告警不能替代覆盖率。
-6. 保留失败、反例和未验范围。没有充分增益证据时保留 `KEEP_BASE`。
+1. State the behavior to change and the resources outside the task scope.
+2. Fix the inputs, initial state, tool permissions, code version, and model version.
+3. Save a recoverable baseline before performing the authorized, bounded action.
+4. Check content, actual display, interaction, and persistence separately.
+5. Count the objects that each checker actually recognized. Zero warnings do not establish coverage.
+6. Retain failures, deliberate failure cases, and unverified scope. Keep `KEEP_BASE` when evidence does not establish sufficient benefit.
 
-## 公开范围与版权
+## Public scope and copyright
 
-正文均为原创中文提炼。上游链接用于说明来源与版本，不表示重新许可第三方代码、文章或权重。本文集没有搬入模型、压缩包、项目脚本、完整第三方文章或原始会话。
+The articles present original summaries, now in English. Upstream links identify sources and versions. They do not relicense third-party code, articles, or weights. This collection does not include models, archives, project scripts, complete third-party articles, or raw conversations.
 
-示例只使用通用占位符。个人路径、设备与网络标识、凭据、内部任务标识、私人配置和业务资料不进入正文。私有来源清单与核对记录也不属于本文集内容。
+Examples use generic placeholders only. The text excludes personal paths, device and network identifiers, credentials, internal task identifiers, private configuration, and business information. Private source inventories and verification records also remain outside this collection.
 
-本文集是可供审核的技术学习稿。仓库维护者仍需独立完成公开范围、来源和发布验收。
+At the original export stage, this collection formed a technical learning draft for review. Repository maintainers still needed to complete independent checks of public scope, sources, and publication. That historical status does not describe the repository's current publication state.

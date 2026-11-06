@@ -1,164 +1,164 @@
-# 验证与失败：三个适配案例的证据边界
+# Validation and Failures: Evidence Boundaries in Three Adaptation Cases
 
-本文汇总 2026 年 10 月 31 日至 11 月 3 日的历史验收记录。本文于 2026 年 11 月 6 日核对这些记录。此次核对只读取已登记的验收文件。此次核对没有重新运行测试、程序或服务。
+This article summarizes historical acceptance records from October 31 through November 3, 2026. The original review checked these records on November 6, 2026. It read only registered acceptance files. It did not rerun tests, programs, or services.
 
-三个案例支持同一条工作规则：先定义结果，再检查动作，最后读取实际结果。测试数量、安装状态、信任状态和文件下载各自回答不同问题。报告必须保留这些区别。
+The three cases support one working rule: define the result, inspect the action, then read the actual result. Test counts, installation state, trust state, and file downloads answer different questions. Reports must retain those distinctions.
 
-## 1. 用五层证据描述适配
+## 1. Describe Adaptation with Five Evidence Levels
 
-| 证据层 | 本层回答的问题 | 本层所需证据 |
+| Evidence level | Question | Required evidence |
 | --- | --- | --- |
-| 来源 | 当时核对了哪个版本？ | 固定提交、发布标签、资产摘要 |
-| 静态机制 | 代码可能沿哪条路径执行？ | 固定源码位置、调用关系、条件分支 |
-| 合成验证 | 指定输入能否触发预期结果？ | 冻结输入、负控、正控、实际退出码 |
-| 原生运行 | 真实宿主是否触发目标阶段？ | 宿主事件、阶段回执、结果读回 |
-| 场景验收 | 目标设备或发布场景是否达到要求？ | 场景操作、可见结果、独立读回 |
+| Source | Which version did the review examine? | Pinned commit, release tag, and asset hash |
+| Static mechanism | Which execution paths could the code take? | Pinned source locations, call relationships, and conditional branches |
+| Synthetic validation | Can specified inputs trigger the expected result? | Frozen inputs, negative controls, positive controls, and actual exit codes |
+| Native execution | Does the real host trigger the target stage? | Host events, stage receipts, and result readback |
+| Scenario acceptance | Does the target device or publication scenario meet the requirements? | Scenario operations, visible results, and independent readback |
 
-每个结论必须指出证据层。后一层需要新的证据。前一层的通过记录不能自动完成后一层。
+Every conclusion must identify its evidence level. The next level requires new evidence. A passing record at an earlier level does not automatically complete the next level.
 
-## 2. TokenEconomizer：本机改造和 322 项测试的限度
+## 2. TokenEconomizer: Limits of the Local Adaptation and 322 Tests
 
-历史记录绑定 [TokenEconomizer 固定提交](https://github.com/microsoft/TokenEconomizer/tree/1deb887bb6816188e24580f8812e65288af5757c)。本机适配另外增加了身份约束、范围约束和阶段回执。上游提交只标识基础版本。本机适配结果不能代表未修改的上游版本。
+The historical record binds to the [pinned TokenEconomizer commit](https://github.com/microsoft/TokenEconomizer/tree/1deb887bb6816188e24580f8812e65288af5757c). The local adaptation added identity constraints, scope constraints, and stage receipts. The upstream commit identifies only the base version. The local adaptation results do not represent the unmodified upstream version.
 
-### 已有结果
+### Established Results
 
-本机入口要求原生会话身份。入口拒绝缺失身份、未列入许可范围的身份和旧身份覆盖值。三个合成负控都返回退出码 2。记录显示三个负控没有产生状态结果。
+The local entry point requires a native session identity. It rejects a missing identity, an identity outside the allowlist, and a legacy identity override. All three synthetic negative controls returned exit code 2. The records show that none of the three produced a state result.
 
-适配代码在读取范围策略或会话内容之前绑定身份。启动包装器移除了固定身份注入。事件记录只保留元数据。技能说明分别描述配置、学习和状态阶段。任务状态检查与学习范围使用不同职责。
+The adaptation binds identity before it reads the scope policy or session content. The launcher wrapper removed fixed-identity injection. Event records retain metadata only. The skill instructions describe configuration, learning, and status as separate stages. Task-status checks and learning-scope checks have distinct responsibilities.
 
-历史回归记录包含 **322 项测试**。记录包含 **0 项失败、0 项错误、0 项跳过**。安装包核对包含 84 个文件。记录显示全部文件匹配预期摘要。此次导出核对了验收记录。此次导出没有重新读取 JUnit 原件或安装目录。
+The historical regression record contains **322 tests**, with **0 failures, 0 errors, and 0 skipped tests**. The installation-package check covered 84 files. The records show that every file matched its expected hash. The original export checked acceptance records. It did not reread the original JUnit files or the installation directory.
 
-历史操作者通过原生审核界面逐项审核了五个相关事件定义。记录显示审核完成。记录同时保留了无关定义的待审核状态。这一步证明当时的审核动作完成。
+The historical operator reviewed five relevant event definitions individually through the native review interface. The records show completion of that review. They also retain the pending-review state of unrelated definitions. This step establishes completion of the review actions at that time.
 
-### 未完成的运行链
+### Incomplete Runtime Chain
 
-原生运行遇到会话占用锁。另一个应用持有同一会话。操作者保留了锁。操作者没有绕过会话归属。
+Native execution encountered a session-ownership lock. Another application held the same session. The operator retained the lock and did not bypass session ownership.
 
-当时只允许一个会话进入学习范围。该范围不足以证明后续独立会话的事实注入行为。操作者没有扩大许可范围。
+At the time, the learning scope permitted only one session. That scope could not establish fact-injection behavior in a later independent session. The operator did not expand the allowlist.
 
-| 运行阶段 | 历史记录 |
+| Runtime stage | Historical record |
 | --- | --- |
-| 真实 Hook 触发 | 未观察到 |
-| 许可范围内的原生会话记录 | 未观察到 |
-| 真实会话折叠 | 未观察到 |
-| 候选事实或活动事实 | 未观察到 |
-| 原生事实注入 | 未观察到 |
-| 后续会话使用事实 | 未观察到 |
+| Actual hook trigger | Not observed |
+| Allowlisted native session record | Not observed |
+| Actual session folding | Not observed |
+| Candidate or active facts | Not observed |
+| Native fact injection | Not observed |
+| Fact use in a later session | Not observed |
 
-记录中的实际处理会话数为 **0**。记录中的注入行数为 **0**。因此，322 项测试支持本机隔离和入口回归结论。真实学习、跨会话使用、模型收益和成本节省仍缺少验收证据。
+The records show **0** sessions actually processed and **0** injected lines. The 322 tests therefore support conclusions about local isolation and entry-point regressions. Actual learning, use across sessions, model gains, and cost savings still lack acceptance evidence.
 
-### 可复用步骤
+### Reusable Steps
 
-1. 在入口处取得宿主提供的身份。
-2. 在读取内容之前验证身份和范围。
-3. 为缺失身份和冲突身份设置负控。
-4. 单独核对维护源码与安装包。
-5. 单独记录定义审核结果。
-6. 按真实触发、记录、折叠、事实、注入和后续使用逐阶段验收。
-7. 遇到归属锁时停止该运行路径。
-8. 保留回归结果和未完成阶段。
+1. Obtain the identity that the host supplies at the entry point.
+2. Validate identity and scope before reading content.
+3. Add negative controls for missing and conflicting identities.
+4. Check the maintained source and installation package separately.
+5. Record definition-review results separately.
+6. Accept each stage separately: actual trigger, recording, folding, facts, injection, and later use.
+7. Stop that execution path when an ownership lock blocks it.
+8. Retain regression results and incomplete stages.
 
-## 3. AiSOC 启发的清理验收：动作返回值与实际效果
+## 3. Cleanup Acceptance Inspired by AiSOC: Action Return Values and Actual Effects
 
-历史来源核对绑定 [AiSOC 固定版本的证据包设计](https://github.com/beenuar/AiSOC/blob/4416ebe55ca8ae1b246896c04e90e874dfa2f32c/docs/architecture/evidence-bundles.md) 和 [动作分发源码](https://github.com/beenuar/AiSOC/blob/4416ebe55ca8ae1b246896c04e90e874dfa2f32c/services/actions/app/live_actions/dispatcher.py)。该来源记录区分动作执行结果与效果核验状态。该机制为本机实验提供学习依据。
+The historical source review binds to the [evidence-bundle design in the pinned AiSOC version](https://github.com/beenuar/AiSOC/blob/4416ebe55ca8ae1b246896c04e90e874dfa2f32c/docs/architecture/evidence-bundles.md) and the [action-dispatch source](https://github.com/beenuar/AiSOC/blob/4416ebe55ca8ae1b246896c04e90e874dfa2f32c/services/actions/app/live_actions/dispatcher.py). Those source records distinguish action-execution results from effect-verification status. That mechanism informed the local experiment.
 
-本案例将效果核验思想用于既有文件清理入口。任务使用隔离的合成文件。任务没有执行上游 AiSOC 程序。本机合成验收只评价本机入口。本文不将本机结果归为 AiSOC 上游运行验收。
+This case applied effect verification to an existing file-cleanup entry point. The task used isolated synthetic files. It did not execute upstream AiSOC. The local synthetic acceptance evaluates only the local entry point. This article does not attribute the local results to runtime acceptance of upstream AiSOC.
 
-### 先冻结验收条件
+### Freeze Acceptance Conditions First
 
-每个案例使用一个独立目录。每个目录包含一个 3 字节文件。记录在调用前固定源路径、目标路径、字节摘要和文件身份。故障只影响声明的动作边界。操作者在独立读回前恢复故障注入。
+Each case used a separate directory. Each directory contained one 3-byte file. Before invocation, the record fixed the source path, target path, byte hash, and file identity. Faults affected only the declared action boundary. The operator removed the injected fault before independent readback.
 
-负控要求清理入口明确拒绝完成。负控同时要求文件仍可恢复。独立读回必须核对路径、字节、摘要和身份。独立读回不能替代清理入口自身的效果核验结果。
+The negative controls required the cleanup entry point to reject completion explicitly. They also required the file to remain recoverable. Independent readback had to check the path, bytes, hash, and identity. Independent readback could not substitute for the cleanup entry point's own effect-verification result.
 
-### v1 驱动失败和 v2 修复
+### The v1 Driver Failure and v2 Repair
 
-首轮驱动没有建立任何案例验收。驱动以退出码 1 结束。驱动没有生成四个案例结果文件。驱动随后读取缺失的正控文件，并抛出文件不存在错误。首轮驱动也没有保存子进程的标准输出和标准错误。因此，首轮子进程退出码无法恢复。
+The first driver run established no case acceptance. The driver ended with exit code 1. It did not generate the four case-result files. It then read a missing positive-control file and raised a file-not-found error. The first driver also failed to retain subprocess standard output and standard error. The operator therefore could not recover the first-run subprocess exit codes.
 
-失败记录指出配置摘要失配。准备助手更新了磁盘配置。已加载的配置字典保留旧值。计划使用旧字典生成摘要。子进程重新读取磁盘配置后得到新摘要。
+The failure record identified a configuration-hash mismatch. The preparation helper updated configuration on disk. The loaded configuration dictionary retained old values. Plan generation used the old dictionary to compute the hash. The subprocess reread the disk configuration and obtained the new hash.
 
-v2 只修复任务驱动。v2 在生成计划前同步配置。v2 为每个子进程保留退出码、标准输出和标准错误。v2 使用新目录重新冻结输入。v2 保留 v1 证据。v2 没有修改被测实现。v2 没有降低验收条件。任务只允许一次修正后的基线运行。
+The v2 repair changed only the task driver. The v2 driver synchronized configuration before plan generation. The v2 driver retained each subprocess's exit code, standard output, and standard error. The v2 driver used new directories to freeze inputs again. The v2 driver retained the v1 evidence. The v2 driver did not change the implementation under test. The v2 driver did not lower the acceptance criteria. The task permitted only one corrected baseline run.
 
-### 四个案例和 67 项断言
+### Four Cases and 67 Assertions
 
-| 案例 | 故障或动作 | 子进程退出码 | 目标核验值 | 已验证清理计数 | 物理结果 |
+| Case | Fault or action | Subprocess exit code | Target-verification value | Verified cleanup count | Physical result |
 | --- | --- | --- | --- | --- | --- |
-| N1 | 重命名适配器正常返回，但不移动文件 | 1 | false | 0 | 源文件保留；目标不存在 |
-| N2 | 实际重命名后，目标核验返回 ENOSYS | 1 | false | 0 | 文件保留在声明的恢复位置 |
-| N3 | 实际重命名后，目标核验返回 EIO | 1 | false | 0 | 文件保留在声明的恢复位置 |
-| P1 | 正常重命名，并读取目标结果 | 0 | true | 1 | 目标文件匹配原字节、摘要和身份 |
+| N1 | The rename adapter returns normally without moving the file | 1 | false | 0 | Source file remains; target does not exist |
+| N2 | Target verification returns ENOSYS after an actual rename | 1 | false | 0 | File remains at the declared recovery location |
+| N3 | Target verification returns EIO after an actual rename | 1 | false | 0 | File remains at the declared recovery location |
+| P1 | Normal rename followed by target-result readback | 0 | true | 1 | Target file matches the original bytes, hash, and identity |
 
-四个案例共通过 **67 项驱动断言**。独立审计给出 **PASS_WITH_LIMITS**。三个负控退出码 1 表示预期拒绝。汇总驱动退出码 0 表示四个案例满足验收条件。汇总退出码不能把三个负控改写为成功清理。
+The four cases passed **67 driver assertions**. The independent audit returned **PASS_WITH_LIMITS**. Exit code 1 in the three negative controls means the expected rejection. Exit code 0 from the aggregate driver means that all four cases met their acceptance conditions. The aggregate exit code does not turn the three negative controls into successful cleanups.
 
-这些进程通过适配器调用既有 API。此次实验没有完成全生产 CLI 的故障注入验收。独立审计核对了子进程文件。独立审计没有独立见证最外层进程。历史操作者另外保存了最外层退出码 0 的工具观察。
+These processes invoked the existing API through adapters. This experiment did not complete fault-injection acceptance for the full production CLI. The independent audit checked subprocess files. It did not independently witness the outermost process. The historical operator separately retained the tool observation of exit code 0 from that outermost process.
 
-### 保留两个覆盖缺口
+### Retain Two Coverage Gaps
 
-N1 回执仍出现 `moved=true`。此时源文件仍存在，目标文件不存在。这个标记记录了动作适配器正常返回。这个标记没有准确表达物理移动效果。
+The N1 receipt still contained `moved=true`. At that point, the source file still existed and the target file did not exist. This flag recorded the action adapter's normal return. It did not accurately describe the physical movement.
 
-本轮冻结条件使用显式目标核验值、状态、计数、退出码和独立路径读回。N1 满足本轮拒绝条件。N1 同时暴露了回执字段语义缺口。报告必须同时保留这两个结论。
+The frozen conditions for this run used explicit target-verification values, state, counts, exit codes, and independent path readback. N1 met this run's rejection conditions. N1 also exposed a semantic gap in a receipt field. Reports must retain both conclusions.
 
-N2 的 ENOSYS 表示目标核验能力不可用。N2 没有覆盖核验函数缺失、核验注册缺失、调用跳过或结果缺失。驱动的精确布尔比较会拒绝缺失值或空值。此次案例没有实际注入这些情况。
+ENOSYS in N2 means that target-verification capability was unavailable. N2 did not cover an absent verification function, absent verification registration, a skipped invocation, or a missing result. The driver's exact Boolean comparison rejects missing or null values. This experiment did not actually inject those cases.
 
-### 适配判断
+### Adaptation Decision
 
-实验支持保留既有清理入口。历史决策为 **KEEP_BASE**。任务没有增加第二个核验器、全局技能、服务或定时器。任务没有修改既有清理实现。
+The experiment supports retention of the existing cleanup entry point. The historical decision was **KEEP_BASE**. The task added no second verifier, global skill, service, or timer. It did not change the existing cleanup implementation.
 
-本案例支持一个具体方法：清理完成条件必须包含目标结果读回。正常返回只说明动作调用结束。回执标记必须与目标结果一起解释。
+This case supports one specific method: cleanup completion must include target-result readback. A normal return establishes only that the action invocation ended. Receipt flags require interpretation alongside target results.
 
-历史收尾记录显示五个已结束中间文件进入可恢复位置。收尾记录包含目标字节、摘要和身份核对。正控样本保留以供复查。移动到可恢复位置不证明磁盘空间已经释放。
+The historical closeout record shows that five intermediate files with no remaining purpose moved to recoverable locations. That record includes target-byte, hash, and identity checks. The positive-control sample remained available for review. Movement to a recoverable location does not establish released disk space.
 
-## 4. T3 Code：资产身份通过，隔离行为失败
+## 4. T3 Code: Asset Identity Passed; Isolation Behavior Failed
 
-本案例绑定 [T3 Code v0.1.6 发布](https://github.com/pingdotgg/t3code/releases/tag/v0.1.6) 和 [固定提交](https://github.com/pingdotgg/t3code/tree/2359643cffa6ba9ee84d6f2694b935de54a8013e)。历史发布接口记录给出该版本及其 macOS arm64 资产。
+This case binds to the [T3 Code v0.1.6 release](https://github.com/pingdotgg/t3code/releases/tag/v0.1.6) and the [pinned commit](https://github.com/pingdotgg/t3code/tree/2359643cffa6ba9ee84d6f2694b935de54a8013e). The historical release-API record identifies that version and its macOS arm64 asset.
 
-### 资产层已经确认
+### Confirmed Asset Identity
 
-首轮下载遇到 TLS 证书验证错误。首轮保留了错误。后续修订使用系统下载工具和正常 TLS 验证完成同一个固定资产的下载。
+The first download encountered a TLS certificate-verification error. The record retains that error. A later revision used the system download tool with normal TLS verification to download the same pinned asset.
 
-历史记录确认压缩包大小为 **109,830,529 字节**。压缩包 SHA-256 为 `50c5dfd3e83787c182299a37db3553968346904e7dc7936b2a01061dbfcf90eb`。记录还确认包内入口为 arm64 Mach-O 程序。记录显示入口没有执行，也没有解压到文件系统。此次导出只核对资产身份回执。此次导出没有读取大归档。
+The historical record confirms an archive size of **109,830,529 bytes**. Its SHA-256 is `50c5dfd3e83787c182299a37db3553968346904e7dc7936b2a01061dbfcf90eb`. The record also confirms an arm64 Mach-O entry-point program inside the archive. It shows no execution of that entry point and no extraction to the filesystem. The original export checked only the asset-identity receipt. It did not read the large archive.
 
-### 隔离层没有通过
+### Isolation Did Not Pass
 
-操作者先使用合成探针检查隔离边界。允许组应读取许可文件。拒绝组应拒绝读取另一个合成文件。初始配置和一次调整后的配置都产生相同结果：两组均以 **SIGABRT，返回码 -6** 结束。两组均没有输出诊断文字。
+The operator first used synthetic probes to check the isolation boundary. The allow group should read an authorized file. The deny group should reject a read of another synthetic file. Both the initial configuration and one adjusted configuration produced the same result: both groups ended with **SIGABRT and return code -6**. Neither group emitted diagnostic text.
 
-后续一次有限修订仍保留默认拒绝策略。静态审计确认权限差异符合该次声明范围。新一轮允许组和拒绝组仍均返回 -6。独立审计判定行为验收失败。
+A later bounded revision retained the default-deny policy. Static audit confirmed that the permission differences matched that revision's declared scope. Both groups in the new run still returned -6. Independent audit judged behavioral acceptance a failure.
 
-崩溃不能证明允许组能够读取。崩溃也不能证明拒绝组正确隔离。记录没有定位崩溃发生在沙箱初始化、加载器还是目标程序阶段。记录也没有确认根因。
+The crashes do not establish that the allow group could read the file. They also do not establish correct isolation for the deny group. The record did not locate the crash in sandbox initialization, the loader, or the target-program stage. It did not confirm a root cause.
 
-操作者随后停止权限调整。T3 实际执行次数保持 **0**。版本命令、帮助命令、服务、提供商和移动端均没有获得运行验收。资产下载成功与架构匹配只完成资产身份层。
+The operator then stopped permission adjustments. The actual T3 execution count remained **0**. Version commands, help commands, services, providers, and mobile use received no runtime acceptance. A successful asset download and matching architecture completed only the asset-identity level.
 
-### 静态源码需要精确解释
+### Interpret Static Source Precisely
 
-固定版本的入口审计显示，帮助和版本参数会先加载较大的模块依赖图。[T3 入口源码](https://github.com/pingdotgg/t3code/blob/2359643cffa6ba9ee84d6f2694b935de54a8013e/apps/server/src/bin.ts) 和 [CLI 源码](https://github.com/pingdotgg/t3code/blob/2359643cffa6ba9ee84d6f2694b935de54a8013e/apps/server/src/binCli.ts) 提供了该机制的静态依据。
+The entry-point audit of the pinned version shows that help and version arguments first load a substantial module dependency graph. The [T3 entry-point source](https://github.com/pingdotgg/t3code/blob/2359643cffa6ba9ee84d6f2694b935de54a8013e/apps/server/src/bin.ts) and [CLI source](https://github.com/pingdotgg/t3code/blob/2359643cffa6ba9ee84d6f2694b935de54a8013e/apps/server/src/binCli.ts) provide static evidence for that mechanism.
 
-后续审计核对了 [Effect CLI 的固定源码](https://github.com/Effect-TS/effect/blob/7f524e25cfb49a71ac39b0f44278d08d40dda5de/packages/effect/src/cli/Command.ts#L1891-L1995)。该源码在处理活动帮助或版本动作后返回。正常业务处理器位于这条返回路径之后。这项结果只绑定该 Effect 提交。审计没有确认 T3 发布资产内嵌了完全相同的 Effect 提交。
+A later audit checked the [pinned Effect CLI source](https://github.com/Effect-TS/effect/blob/7f524e25cfb49a71ac39b0f44278d08d40dda5de/packages/effect/src/cli/Command.ts#L1891-L1995). That code returns after handling an active help or version action. The normal application handler follows that return path. This finding applies only to that Effect commit. The audit did not confirm that the T3 release asset embeds exactly the same Effect commit.
 
-因此，模块加载规模不能证明正常服务处理器已经运行。顶层模块导入也不能单独证明提供商数据读取、凭据读取或网络访问。完整的传递依赖审计仍有缺口。
+The scale of module loading therefore does not establish execution of the normal service handler. Top-level imports alone also do not establish provider-data reads, credential reads, or network access. Gaps remain in the complete transitive-dependency audit.
 
-后续审计还读取了 [dyld 的固定映射代码](https://github.com/apple-oss-distributions/dyld/blob/fd8d0c4d52320ebf64db34f3cb280310d905c5ae/dyld/Loader.cpp#L1699-L1713)。该代码说明内存映射有独立失败路径。该代码没有识别本次 -6 的根因。该代码也没有提供继续扩大权限的依据。
+A later audit also read the [pinned dyld mapping code](https://github.com/apple-oss-distributions/dyld/blob/fd8d0c4d52320ebf64db34f3cb280310d905c5ae/dyld/Loader.cpp#L1699-L1713). That code shows a separate failure path for memory mapping. It does not identify the root cause of this -6 result. It also provides no basis for further permission expansion.
 
-### 可复用步骤
+### Reusable Steps
 
-1. 固定发布版本和唯一资产。
-2. 记录下载失败及正常 TLS 重试结果。
-3. 分别核对压缩包摘要、入口架构和运行结果。
-4. 在目标程序执行前验证允许组和拒绝组。
-5. 同时检查进程退出码、预期输出和实际结果。
-6. 为权限调整设置次数限制。
-7. 两组无法区分时停止执行。
-8. 保留失败配置、探针结果和独立审计。
+1. Pin the release and a single asset.
+2. Record download failures and retry results with normal TLS verification.
+3. Check the archive hash, entry-point architecture, and runtime result separately.
+4. Validate both allow and deny groups before executing the target program.
+5. Check process exit codes, expected output, and actual results together.
+6. Limit the number of permission adjustments.
+7. Stop execution when the results do not distinguish the two groups.
+8. Retain failed configurations, probe results, and independent audits.
 
-## 5. 复用时的验收清单
+## 5. Acceptance Checklist for Reuse
 
-- 在执行前冻结输入、版本和通过条件。
-- 为每个关键能力设置负控和正控。
-- 保存每个子进程的真实退出码。
-- 保存空输出和错误输出。
-- 独立读取声明位置的结果。
-- 将动作、核验和物理保存分别记录。
-- 为驱动修复保留原失败。
-- 为修正后的运行建立新冻结记录。
-- 将未覆盖分支写入结果。
-- 保留失败证据和有意保留的样本。
+- Freeze inputs, versions, and passing conditions before execution.
+- Add negative and positive controls for each critical capability.
+- Save the actual exit code of each subprocess.
+- Save empty output and error output.
+- Independently read results from the declared locations.
+- Record actions, verification, and physical retention separately.
+- Retain the original failure when repairing a driver.
+- Create a new frozen record for the corrected run.
+- State uncovered branches in the results.
+- Retain failure evidence and intentionally preserved samples.
 
-三个案例没有完成目标设备、服务发布或跨设备使用验收。本文提供历史方法和历史证据边界。采用者必须为自己的版本、宿主和目标场景重新建立验收记录。
+The three cases did not complete acceptance for target devices, service publication, or use across devices. This article provides historical methods and historical evidence boundaries. Adopters must establish new acceptance records for their own versions, hosts, and target scenarios.

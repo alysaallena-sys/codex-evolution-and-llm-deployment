@@ -1,55 +1,55 @@
-# Codex 流程演进：可复用的方法与验证边界
+# Codex Workflow Evolution: Reusable Methods and Validation Boundaries
 
-本目录整理一组从 2026-10-31 至 2026-11-06 的学习与适配记录。整理日期为 2026-11-06。重点是把外部研究中有依据的机制合入既有工作流程，并保留失败、回退和未验证项。
+This directory collects learning and adaptation records from 2026-10-31 through 2026-11-06. The compilation date is 2026-11-06. The focus is to incorporate mechanisms supported by external research into existing workflows, while retaining failures, rollbacks, and unverified items.
 
-这些文档是历史研究的原创总结。它们不提供当前 Codex 产品的安装说明。固定提交用于说明当时核查的对象；不能把它当作后续版本的保证。本轮只导出文档，没有安装插件、调用模型、启动服务或发布仓库。
+These documents provide original summaries of historical research. They do not provide installation instructions for the current Codex product. Pinned commits identify the versions that the historical review examined. They do not guarantee later versions. The original export phase only exported documents. That phase did not install plugins, call models, start services, or publish a repository.
 
-## 从哪里读起
+## Where to Start
 
-| 文档 | 解决的问题 | 主要内容 |
+| Document | Question | Main topics |
 | --- | --- | --- |
-| [流程演进](workflow-evolution.md) | 外部自改进研究如何进入已有流程 | FlashRSI、Harness²、冻结基线、留出集、失败回退、按职责合并 |
-| [验证与失败](validation-and-failures.md) | 测试、真实效果与完成状态如何对应 | TokenEconomizer、本机清理负控与正控、T3 资产核验和运行阻滞 |
-| [上下文与工具边界](context-and-tool-boundaries.md) | 缓存、压缩建议和组件包是否真的降低成本 | Compact-Adviser、Playwright、Stagehand、WebMCP、ECC |
-| [研究取舍目录](research-decisions.md) | 哪些机制可跨宿主复用，哪些需要保留原有实现 | Super-agent、Memdoor、Spec Kit、知识图谱、文件活动面板、长任务循环 |
+| [Workflow evolution](workflow-evolution.md) | How can external research on self-improvement inform an existing workflow? | FlashRSI, Harness², frozen baselines, holdout sets, rollback after failure, and integration by responsibility |
+| [Validation and failures](validation-and-failures.md) | How do tests, actual effects, and completion status relate? | TokenEconomizer, negative and positive controls for local cleanup, T3 asset verification, and runtime blockers |
+| [Context and tool boundaries](context-and-tool-boundaries.md) | Do caches, compaction advice, and component bundles actually reduce costs? | Compact-Adviser, Playwright, Stagehand, WebMCP, and ECC |
+| [Research decisions](research-decisions.md) | Which mechanisms transfer across hosts, and which require the existing implementation? | Super-agent, Memdoor, Spec Kit, knowledge graphs, file activity panels, and loops for long tasks |
 
-只想复用操作方法，可以先读流程演进，再读验证与失败。计划采用新工具时，先查相应的固定源码和证据层级，再设计自己的小范围验证。
+To reuse the operating method, start with workflow evolution, then read validation and failures. Before adopting a tool, examine its pinned source and evidence level. Then design a bounded validation of your own.
 
-## 按层级描述证据
+## Describe Evidence by Level
 
-| 层级 | 可以说明什么 | 不能据此说明什么 |
+| Level | What it can establish | What it cannot establish |
 | --- | --- | --- |
-| 作者或论文报告 | 作者在给定任务、预算和环境下报告了某个结果 | 本地收益、普遍优势或相同预算下的优势 |
-| 固定源码与文档核查 | 指定版本中的接口、调用顺序、配置和实现约束 | 代码已执行、远端行为与文档一致 |
-| 本机静态或合成验证 | 被检查文件的状态，以及合成输入下的断言结果 | 完整产品、真实模型请求或全部生产入口通过 |
-| 真实运行验证 | 指定环境、指定入口的实际行为 | 其他设备、其他入口或后续版本同样通过 |
-| 真实设备验证 | 指定设备上的实际操作与结果 | 其他设备、其他系统或远程主机已经通过 |
-| 独立验收 | 另一名验收者在明确范围内确认的结果 | 未被覆盖的长期运行、成本和安全性质 |
-| 发布验收 | 实际发布目标上的版本与行为读回 | 仅有构建、文件生成或本地测试时已经发布 |
+| Author or paper report | The author reported a result under specified tasks, budgets, and conditions | Local gains, general superiority, or superiority under an equal budget |
+| Pinned source and documentation review | Interfaces, call order, configuration, and implementation constraints in a specified version | Execution of the code, or agreement between remote behavior and documentation |
+| Local static or synthetic validation | The state of inspected files and assertion results for synthetic inputs | Acceptance of the complete product, real model requests, or every production entry point |
+| Actual runtime validation | Actual behavior in a specified environment through a specified entry point | Acceptance on other devices, through other entry points, or in later versions |
+| Real-device validation | Actual operations and results on a specified device | Acceptance on other devices, operating systems, or remote hosts |
+| Independent acceptance | Results that another reviewer confirmed within an explicit scope | Long-term operation, cost, or security properties outside that scope |
+| Publication acceptance | The version and behavior read back from the actual publication target | Publication on the basis of a build, generated files, or local tests alone |
 
-一次工作可以同时包含多种层级。例如，文件改动可以真实发生，但行为评分仍来自合成文字。文档会分别说明两者。`KEEP_BASE` 表示保留已有实现；候选、收件、源码研究和通过格式校验都不等于启用。
+One task can contain several evidence levels. For example, file changes can be real while behavior scores still come from synthetic text. The documents state each separately. `KEEP_BASE` means retain the existing implementation. A candidate, intake record, source review, or successful format check does not establish activation.
 
-## 已经形成的工作方法
+## Established Working Methods
 
-1. 先写清目标、允许输入、允许改动和验收证据，再选择工具。
-2. 固定来源提交，并说明本次阅读的文件与未读部分。
-3. 查找已有职责。优先合并、替换或删重；没有独立职责时不另建系统。
-4. 修改前冻结基线、评测标准和停止条件。保留失败候选。
-5. 给候选安排新留出集。把已暴露的反例转为回归项。
-6. 记录实际效果，并区分退出码、回执标志与目标对象的状态。
-7. 验证回退与重复执行。清理只处理归属明确、用途结束的独占临时资源。
-8. 成本分别记录上下文、工具元数据、模型请求、子代理、运行时间和费用。没有测量的数据写为未知。
+1. Define the goal, permitted inputs, permitted changes, and acceptance evidence before choosing tools.
+2. Pin the source commit. State which files the review read and which parts it did not read.
+3. Identify existing responsibilities. Prefer integration, replacement, or deduplication. Do not create another system without a distinct responsibility.
+4. Freeze the baseline, evaluation criteria, and stop conditions before editing. Retain failed candidates.
+5. Give each candidate a fresh holdout set. Turn exposed counterexamples into regression cases.
+6. Record actual effects. Distinguish exit codes, receipt flags, and the state of the target object.
+7. Validate rollback and repeated execution. Cleanup covers only temporary resources with clear ownership, exclusive use, and no remaining purpose.
+8. Record context, tool metadata, model requests, subagents, runtime, and monetary cost separately. Mark unmeasured data as unknown.
 
-这些步骤应按改动规模使用。小范围可逆改动可以采用较少检查。复杂行为变更需要冻结标准和独立验收。不能用一套庞大的仪式替代对实际风险的判断。
+Scale these steps to the change. Small reversible changes can use fewer checks. Complex behavior changes require frozen criteria and independent acceptance. A large procedure cannot replace judgment about actual risk.
 
-## 这个目录没有证明的事情
+## What This Directory Does Not Establish
 
-本目录没有证明通用效率提升、真实 token 节省、模型能力提升或全平台兼容。它没有提供大模型部署、真实设备或发布验收。跨设备文件交接的历史失败也不能写成已经落地。
+This directory does not establish general efficiency gains, actual token savings, stronger model capabilities, or compatibility across all platforms. It does not provide acceptance evidence for large-model deployment, real devices, or publication. Historical failures in file handoff across devices remain failures.
 
-部分记录只有固定源码证据，部分记录包含本机合成测试，少数记录包含实际文件改动和回退。具体范围以各文档为准。研究结果不自动授权账号操作、费用支出、保护数据读取或生产变更。
+Some records contain only pinned source evidence. Others contain local synthetic tests. A few contain actual file changes and rollback. Each document states its scope. Research results do not authorize account operations, spending, access to protected data, or production changes.
 
-## 公开范围与复用
+## Public Scope and Reuse
 
-正文只保留原创方法总结、公开来源链接和必要的版本信息。本目录不包含原始会话、私人资源账本、内部配置、第三方完整技能或代码、模型权重、归档包，以及未经验证可移植性的脚本。公开来源的许可证仍适用于对应的第三方材料。
+The text contains only original method summaries, public source links, and necessary version information. This directory excludes original conversations, private resource ledgers, internal configuration, complete third-party skills or code, model weights, archives, and scripts without verified portability. The licenses of public sources continue to apply to their respective third-party materials.
 
-来源原件、读取范围、文件摘要和清理回执保存在发布目录之外。本目录完成文档交付，不代表仓库已经公开，也不代表任何产品已经通过发布验收。
+The original source materials, read scopes, file hashes, and cleanup receipts remain outside the publication directory. Completion of document delivery in the original export phase did not establish that the repository was public. It also did not establish publication acceptance for any product.

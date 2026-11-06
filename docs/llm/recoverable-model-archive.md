@@ -1,115 +1,115 @@
-# 本地模型的可恢复冷归档
+# Recoverable Cold Archive for Local Models
 
-观察日期：2026-10-31。
+Observation date: 2026-10-31.
 
-本案例完成了两组本地模型资产的冷归档。记录显示，归档校验通过后，操作仅删除了五个权重文件。本机保留了其余模型文件与运行环境。空间核验记录了约 18.82 GB 的可用空间增加。
+This case completed a cold archive of two groups of local model assets. The records show that the operation deleted only five weight files after archive verification passed. The computer retained the other model files and the runtime environment. Disk space checks recorded an increase of approximately 18.82 GB in available space.
 
-这里的验收对象是归档完整性与限定范围的源文件释放。本案例没有启动模型推理。本案例也没有完成真实模型的全量恢复验收。
+The acceptance scope covered archive integrity and release of a specified set of source files. This case did not start model inference. It also did not complete a full restoration acceptance check with the real models.
 
-## 先确定资产与删除范围
+## Define the assets and deletion scope first
 
-资产审查先建立文件清单。清单需要关联每个源文件的大小与 SHA-256。删除计划需要列出具体文件，不能只指定一个模型目录。
+The asset review starts with a file inventory. The inventory must associate each source file with its size and SHA-256. The deletion plan must list specific files. A model directory alone does not define the deletion scope.
 
-本案例的计划记录了以下范围：
+The plan in this case recorded the following scope:
 
-| 项目 | 2026-10-31 的记录 |
+| Item | Record from 2026-10-31 |
 | --- | ---: |
-| 模型资产组数 | 2 |
-| 源文件数 | 49 |
-| 源文件总大小 | 18,883,668,178 bytes |
-| 允许删除的权重文件数 | 5 |
-| 允许删除的权重总大小 | 18,817,247,079 bytes |
-| 需要保留的模型文件数 | 44 |
-| 需要保留的模型文件总大小 | 66,421,099 bytes |
+| Model asset groups | 2 |
+| Source files | 49 |
+| Total source file size | 18,883,668,178 bytes |
+| Weight files permitted for deletion | 5 |
+| Total weight size permitted for deletion | 18,817,247,079 bytes |
+| Model files to retain | 44 |
+| Total size of model files to retain | 66,421,099 bytes |
 
-预检记录未发现符号链接或特殊文件。预检记录中的每个源文件只有一个硬链接。预检还检查了目标模型目录的打开文件与指定推理进程。这些结果只说明当时的检查结果，不能代替后续检查。
+Preflight checks found no symbolic links or special files. Each source file had one hard link at the time of the check. Preflight checks also inspected open files in the target model directories and specified inference processes. These findings describe that check only. They do not replace later checks.
 
-通用目录关系如下。占位符不代表本案例的实际路径。
+The following table shows generic directory roles. The placeholders do not represent the actual paths in this case.
 
-| 占位符 | 用途 |
+| Placeholder | Purpose |
 | --- | --- |
-| `<MODEL_ROOT>` | 保存本机模型文件 |
-| `<ARCHIVE_ROOT>` | 保存归档分片与恢复材料 |
-| `<RESTORE_ROOT>` | 接收恢复文件 |
+| `<MODEL_ROOT>` | Stores local model files |
+| `<ARCHIVE_ROOT>` | Stores archive parts and recovery materials |
+| `<RESTORE_ROOT>` | Receives restored files |
 
-## 用有序分片适配归档介质
+## Use ordered parts to fit the archive medium
 
-本案例使用 FAT32 外接卷。恢复说明明确要求避免把超大权重直接恢复到 FAT32。归档方案先生成标准 tar 数据流，再按顺序拆分数据流。
+This case used an external FAT32 volume. The recovery instructions explicitly required a destination other than FAT32 for oversized weight files. The archive procedure first generated a standard tar stream. It then split the stream into ordered parts.
 
-本案例把分片上限设为 2,147,483,648 bytes，即 2 GiB。完整归档包含九个分片。前八个分片各占 2,147,483,648 bytes。最后一个分片占 1,703,847,936 bytes。完整归档共占 18,883,717,120 bytes。
+This case set the part size limit to 2,147,483,648 bytes, or 2 GiB. The complete archive contained nine parts. Each of the first eight parts occupied 2,147,483,648 bytes. The final part occupied 1,703,847,936 bytes. The complete archive occupied 18,883,717,120 bytes.
 
-2 GiB 是本案例的归档参数。它不是模型格式要求，也不是恢复目标的文件大小上限。恢复过程需要重建原始文件，因此恢复目标仍须支持原始权重文件的大小。
+The 2 GiB value was an archive parameter for this case. It was neither a model format requirement nor a file size limit for the recovery destination. Recovery must reconstruct the original files. The recovery destination must therefore support the original weight file sizes.
 
-分片清单需要保存顺序、大小与 SHA-256。完整归档还需要单独的 SHA-256。仅确认分片数量，不能确认归档内容。
+The part manifest must retain the order, size, and SHA-256 of each part. The complete archive also requires its own SHA-256. A part count alone cannot establish archive content integrity.
 
-## 校验必须形成删除门禁
+## Make verification a deletion gate
 
-本案例记录了三层内容校验：
+This case recorded three levels of content verification:
 
-1. 核对每个分片的 SHA-256。
-2. 核对按顺序拼接后的完整 tar 的 SHA-256。
-3. 核对归档内全部文件的大小与 SHA-256。
+1. Check the SHA-256 of each part.
+2. Check the SHA-256 of the complete tar stream after concatenating the parts in order.
+3. Check the size and SHA-256 of every file inside the archive.
 
-第一次全量验证通过了全部 49 个文件。随后，独立验证从归档介质上的恢复程序与清单读取数据。第二次验证也通过了全部 49 个文件。两次验证记录了相同的完整归档 SHA-256。
+The first full verification passed for all 49 files. An independent verification then read data through the recovery program and manifests on the archive medium. The second verification also passed for all 49 files. Both passes recorded the same SHA-256 for the complete archive.
 
-早期审查曾指出一个限制：创建过程使用了内存中的源清单。因此，创建完成不能直接触发源文件删除。后续门禁要求独立读取归档介质上的恢复材料，并核对恢复材料的哈希。
+An early review identified a limitation: archive creation used the source inventory held in memory. Completion of archive creation could therefore not directly authorize source file deletion. The later gate required independent reading of the recovery materials from the archive medium and verification of their hashes.
 
-删除前的门禁还重新核对了全部 49 个源文件的 SHA-256。门禁只放行了预先列出的五个权重文件。这个顺序把“归档创建完成”与“允许释放源文件”分成了两个判定。
+The deletion gate also rechecked the SHA-256 of all 49 source files. It permitted deletion of only the five weight files in the approved list. This sequence separated archive creation from authorization to release source files.
 
-## 恢复应拒绝损坏与覆盖
+## Recovery must reject corruption and conflicting overwrites
 
-恢复说明要求恢复程序保留内容相同的现有文件。恢复说明还要求程序拒绝覆盖内容不同的现有文件。
+The recovery instructions required the program to retain existing files with identical content. They also required it to reject overwrites of existing files with different content.
 
-早期审查发现了一个并发风险：另一个进程可能在恢复期间创建目标文件。记录中的修正方案先写临时文件，再读回临时文件。程序核对 SHA-256 后，通过原子且不覆盖的硬链接操作提交文件。
+An early review identified a concurrency risk: another process could create a destination file during recovery. The recorded correction first wrote a temporary file, then read it back. After SHA-256 verification, the program committed the file through an atomic hard link operation that did not overwrite an existing destination.
 
-夹具测试使用了三个文件与十个分片。测试记录包含以下结果：
+Fixture tests used three files and ten parts. The test records contained the following results:
 
-| 测试对象 | 记录结果 | 结论范围 |
+| Test subject | Recorded result | Supported scope |
 | --- | --- | --- |
-| 跨分片恢复 | 通过 | 小型夹具可以跨分片恢复 |
-| 空文件 | 通过 | 夹具覆盖了空文件 |
-| 损坏分片 | 拒绝 | 分片校验失败会中止处理 |
-| 恢复后读回 | 通过 | 夹具恢复内容通过读回核验 |
-| 原子且不覆盖的提交 | 通过 | 夹具覆盖了提交路径 |
-| 并发出现的目标文件 | 拒绝 | 测试保留了并发创建的文件 |
-| 本次恢复临时文件清理 | 通过 | 夹具记录了所属临时文件的清理结果 |
+| Recovery across part boundaries | Pass | The small fixture supported recovery across part boundaries |
+| Empty file | Pass | The fixture covered an empty file |
+| Corrupt part | Rejected | Failed part verification stopped processing |
+| Readback after recovery | Pass | Recovered fixture contents passed readback verification |
+| Atomic commit without overwrite | Pass | The fixture covered the commit path |
+| Concurrently created destination file | Rejected | The test preserved the file that another operation created |
+| Cleanup of temporary files from this recovery | Pass | The fixture recorded cleanup results for its own temporary files |
 
-这些结果支持恢复机制的小型测试结论。它们不能证明真实模型已经完成全量恢复。
+These results support the small fixture test conclusions about the recovery mechanism. They do not prove full restoration of the real models.
 
-## 删除源文件前后都要验收
+## Check before and after deleting source files
 
-删除前需要同时满足资产范围、归档完整性与源文件身份检查。删除后需要重新检查文件状态，不能只读取删除命令的退出码。
+Deletion requires concurrent satisfaction of the asset scope, archive integrity, and source identity checks. After deletion, check file states again. The deletion command's exit code alone is insufficient.
 
-本案例的删除后核验记录了以下结果：
+The checks after deletion recorded the following results:
 
-- 五个指定权重文件均已从源目录移除。
-- 其余 44 个模型文件均通过 SHA-256 核验。
-- 归档介质上的释放结果与本机记录一致。
-- 归档仍包含九个分片。
-- 完整归档哈希与删除前记录一致。
-- 运行入口仍然存在。
+- All five specified weight files were absent from the source directories.
+- The other 44 model files passed SHA-256 verification.
+- The release result on the archive medium matched the local record.
+- The archive still contained nine parts.
+- The complete archive hash matched the record before deletion.
+- The runtime entry point still existed.
 
-释放记录还明确写明：操作没有启动推理，操作没有停止现有服务。因此，运行入口存在只证明入口文件仍在。它不证明模型服务能够加载权重，也不证明推理功能可用。
+The release record explicitly stated that the operation did not start inference or stop existing services. The remaining entry point therefore establishes only that the entry file still existed. It does not establish that a model service could load the weights or perform inference.
 
-## 空间结果要区分逻辑大小与可用空间
+## Distinguish logical size from available space
 
-| 指标 | 2026-10-31 的记录 |
+| Metric | Record from 2026-10-31 |
 | --- | ---: |
-| 删除权重的逻辑大小 | 18,817,247,079 bytes |
-| 操作前本机可用空间 | 255,376,113,664 bytes |
-| 操作后本机可用空间 | 274,193,506,304 bytes |
-| 可用空间观测增加量 | 18,817,392,640 bytes |
+| Logical size of deleted weights | 18,817,247,079 bytes |
+| Local available space before the operation | 255,376,113,664 bytes |
+| Local available space after the operation | 274,193,506,304 bytes |
+| Observed increase in available space | 18,817,392,640 bytes |
 
-删除文件的逻辑大小与文件系统报告的空间变化属于不同指标。本文分别保留这两个值。本文不把两者的差额归因于某个未经核验的系统机制。
+The logical size of deleted files and the space change reported by the file system are different metrics. This article retains both values. It does not attribute the difference to an unverified system mechanism.
 
-## 恢复要求与验证边界
+## Recovery requirements and verification limits
 
-恢复说明要求使用支持大文件与硬链接的内置 APFS 卷。说明估计恢复需要约 19 GB 可用空间，并建议至少预留 25 GB。恢复完成后仍需单独检查模型服务。
+The recovery instructions required an internal APFS volume that supports large files and hard links. They estimated a need for approximately 19 GB of available space and recommended at least 25 GB. The model service still requires a separate check after restoration.
 
-两份全量归档验证结果中的真实恢复文件数均为零。因此，本案例支持以下结论：归档内容在当时通过了全量读回核验；限定源文件的释放在当时通过了前后检查；恢复机制通过了小型夹具测试。
+Both full archive verification results recorded zero restored real files. This case therefore supports three conclusions: the archive contents passed full readback verification at that time; release of the specified source files passed checks before and after deletion; and the recovery mechanism passed small fixture tests.
 
-本案例没有提供以下验收结果：真实模型全量恢复、恢复后的模型加载、推理输出、推理性能、后续日期的介质健康，以及长期离线保存。本文也没有重新连接介质或重新运行归档程序。
+This case provides no acceptance results for full restoration of real models, model loading after restoration, inference output, inference performance, medium health on later dates, or long-term offline retention. This compilation did not reconnect the medium or rerun the archive program.
 
-本文依据计划、两份归档验证结果、分片清单、恢复说明、审查记录、夹具测试结果、删除门禁、释放结果与删除后核验撰写。所有数字均来自 2026-10-31 的这些原件。
+This article draws on the plan, two archive verification results, the part manifest, recovery instructions, review records, fixture test results, the deletion gate, the release result, and checks after deletion. All figures come from those original records dated 2026-10-31.
 
-所核对原件没有提供外部上游 URL 或固定模型修订。因此，本案例没有外部上游版本绑定。本地目录名称不能代替模型来源、许可证或版本核验。本文不复制模型权重、归档程序或第三方代码。
+The original records under review provided neither external upstream URLs nor fixed model revisions. This case therefore has no external upstream version binding. Local directory names cannot establish model provenance, licenses, or versions. This article does not reproduce model weights, the archive program, or third-party code.

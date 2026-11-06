@@ -1,9 +1,9 @@
-# 来源与使用说明
+# Sources and Use
 
-本仓库以公开阅读和交流学习成果为目的。正文由既有学习记录整理、脱敏和改写而来。
+This repository supports public reading and exchange of learning outcomes. Its text consists of summaries, sanitized adaptations and rewrites of existing learning records.
 
-第三方资料采用原始链接、版本定位和必要的独立摘要。引用不表示本仓库拥有上游代码、模型、媒体或服务的权利。
+Third-party references use original links, revision pointers and necessary independent summaries. A reference does not establish ownership of upstream code, models, media or services.
 
-各上游项目、模型和服务保留其各自的许可证与条款。本仓库没有为这些材料重新授予许可。
+Upstream projects, models and services retain their respective licenses and terms. This repository does not relicense those materials.
 
-首版没有指定统一的再许可条款。需要复用具体材料时，请先核对其来源、原许可和适用范围。
+The first edition does not specify a repository-wide reuse license. Before reusing particular material, check its source, original license and applicable scope.

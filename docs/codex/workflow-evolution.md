@@ -1,137 +1,137 @@
-# 从研究机制到可复用的智能体工作流程
+# From Research Mechanisms to a Reusable Agent Workflow
 
-历史观察区间：2026-10-31 至 2026-11-06。主要改造与评分记录来自 2026-11-01。本文在 2026-11-06 核对已有记录。本文没有重新运行上游框架。
+Historical observation period: 2026-10-31 through 2026-11-06. The main adaptation and scoring records date from 2026-11-01. The original review checked existing records on 2026-11-06. It did not rerun the upstream frameworks.
 
-这次学习形成了一套有版本、有测试、有回退条件的改造方法。改造复用了既有任务协调技能、学习技能和评估参考文档。记录没有证明真实任务效率提高。记录也没有证明帕累托改进或卡尔多改进。
+This research produced an adaptation method with versions, tests, and rollback conditions. The changes reused the existing task-coordination skill, learning skill, and evaluation reference document. The records do not establish higher efficiency on real tasks. They also do not establish a Pareto improvement or a Kaldor improvement.
 
-## 先区分四类证据
+## Distinguish Four Evidence Categories First
 
-| 证据类别 | 本次材料能证明什么 | 本次材料不能证明什么 |
+| Evidence category | What these materials can establish | What these materials cannot establish |
 | --- | --- | --- |
-| 上游作者测试 | 特定论文协议下的报告结果 | 当前桌面产品的效果 |
-| 固定版本源码核查 | 该版本包含的机制与接口 | 接口在当前环境中可用 |
-| 合成文字测试 | 回答覆盖了哪些预设行为要求 | 回答描述的动作已经执行 |
-| 实际文件改造与回读 | 指定文件内容、模式和摘要符合记录 | 原生会话已加载规则，或真实任务更快 |
+| Upstream author tests | Reported results under a particular paper protocol | Effects in the current desktop product |
+| Pinned source review | Mechanisms and interfaces in that version | Availability of those interfaces in the current environment |
+| Synthetic text tests | Preset behavior requirements that the answers cover | Execution of the actions that the answers describe |
+| Actual file changes and readback | Agreement of specified file content, modes, and hashes with the records | Loading of rules by a native session, or faster real tasks |
 
-独立评分只表示另一名评分者检查了冻结答案。独立评分不等于独立复现实验。单轮文字通过率不能替代重复运行、完整成本记录或真实任务验收。
+Independent scoring means only that another scorer checked the frozen answers. It does not constitute independent experimental reproduction. A single round of text pass rates cannot replace repeated runs, complete cost records, or acceptance on real tasks.
 
-## FlashRSI：借鉴实验纪律
+## FlashRSI: Adopt Experimental Discipline
 
-历史核查将 FlashRSI 固定到 [RUC-NLPIR/FlashRSI 的公开提交](https://github.com/RUC-NLPIR/FlashRSI/commit/dea1b1d0285e3328234a1e344562bb9e54ce14f7)。该版本记录了 13 种算法、30 个基准和 5 个 harness 集成。此前贴文提到 12 种方法、30 多个基准和 3 个 harness。两个计数对应不同观察时点。它们不能互相替代。
+The historical review pinned FlashRSI to a [public commit in RUC-NLPIR/FlashRSI](https://github.com/RUC-NLPIR/FlashRSI/commit/dea1b1d0285e3328234a1e344562bb9e54ce14f7). That version records 13 algorithms, 30 benchmarks, and 5 harness integrations. An earlier post mentioned 12 methods, more than 30 benchmarks, and 3 harnesses. The two counts reflect different observation times. Neither replaces the other.
 
-FlashRSI将算法、基准和智能体运行框架放进统一实验结构。其候选版本主要修改智能体使用的资源。该结构本身不证明基础模型权重发生训练。核查记录还指出，该版本的 Codex 集成采用基于 rust-v0.147.0 的 Python 语义移植。该集成不等于控制当前桌面会话，也不证明它复用了现有登录。
+FlashRSI places algorithms, benchmarks, and agent harnesses within a unified experimental structure. Its candidate versions mainly change resources that the agent uses. The structure itself does not establish training of the base model's weights. The review also notes that this version's Codex integration uses a Python semantic port based on rust-v0.147.0. That integration does not constitute control of the current desktop session or establish reuse of the existing login.
 
-这次适配没有安装 FlashRSI。实际改造从现有流程中提取了七项要求：
+The adaptation did not install FlashRSI. The actual changes extracted seven requirements from the existing workflow:
 
-1. 保存真实基线与恢复副本。
-2. 给候选记录父版本和文件摘要。
-3. 在修改前固定范围、标准、留出样例和预算。
-4. 分开开发样例与未曝光的验收样例。
-5. 先检查权限、数据范围和保护边界。
-6. 分开记录评估结果、当前授权、文件回读和真实运行验收。
-7. 回退前核对当前候选摘要，再恢复内容与文件模式。
+1. Save the actual baseline and a recovery copy.
+2. Record each candidate's parent version and file hashes.
+3. Freeze scope, criteria, holdout cases, and budget before editing.
+4. Separate development cases from unexposed acceptance cases.
+5. Check permissions, data scope, and protected boundaries first.
+6. Record evaluation results, current authorization, file readback, and actual runtime acceptance separately.
+7. Check the current candidate hash before rollback, then restore content and file modes.
 
-既有任务协调技能承担状态、资源和清理职责。一个按需读取的参考文档承载改造评估要求。既有学习技能增加了交叉引用。这个安排没有新增技能包、数据库、后台程序或定时器。
+The existing task-coordination skill retained responsibility for state, resources, and cleanup. An on-demand reference document held the adaptation-evaluation requirements. The existing learning skill gained a cross-reference. This arrangement added no skill bundle, database, background program, or timer.
 
-实际文件记录显示，任务协调入口从 10,353 字节增加到 11,166 字节，增加 813 字节。按需参考文档为 8,081 字节。学习技能从 2,537 字节增加到 2,981 字节，增加 444 字节。这些数字衡量文件大小。它们不等于模型 token 用量。
+The actual file records show that the task-coordination entry point grew from 10,353 bytes to 11,166 bytes, an increase of 813 bytes. The on-demand reference document contained 8,081 bytes. The learning skill grew from 2,537 bytes to 2,981 bytes, an increase of 444 bytes. These figures measure file size. They do not measure model-token usage.
 
-合成文字测试包含 3 个开发样例和 4 个留出样例。每个版本只生成一组冻结答案。独立评分只执行一次。
+The synthetic text tests contained 3 development cases and 4 holdout cases. Each version generated only one frozen answer set. Independent scoring ran only once.
 
-| 项目 | 基线 | 候选 |
+| Measure | Baseline | Candidate |
 | --- | ---: | ---: |
-| 开发样例通过数 | 2/3 | 3/3 |
-| 留出样例通过数 | 3/4 | 4/4 |
-| 总通过数 | 5/7 | 7/7 |
-| 强制要求覆盖数 | 47/49 | 49/49 |
-| 禁止行为违反数 | 0 | 0 |
+| Development cases passed | 2/3 | 3/3 |
+| Holdout cases passed | 3/4 | 4/4 |
+| Total cases passed | 5/7 | 7/7 |
+| Mandatory requirements covered | 47/49 | 49/49 |
+| Prohibited-behavior violations | 0 | 0 |
 
-文件回读核对了 5 个候选文件。静态检查核对了 84 个包内文件。恢复演练核对了副本内容与模式。上述结果证明了限定范围内的文件改造和检查。它们没有证明真实会话加载、实际工具执行或原生回退成功。
+File readback checked 5 candidate files. Static checks covered 84 files within the package. A recovery drill checked copy content and modes. These results establish bounded file changes and checks. They do not establish loading by a real session, actual tool execution, or successful native rollback.
 
-## Harness²：合并三项机制
+## Harness²: Integrate Three Mechanisms
 
-历史核查将 Harness² 固定到 [google-research/harness2 的公开提交](https://github.com/google-research/harness2/commit/1cfe254e8d25b15f37048c3730134686abe60335)。论文版本为 [arXiv:2610.14224v1](https://arxiv.org/html/2610.14224v1)。上游采用提出候选、配对探测和选择性组合的循环。循环允许保留基线。
+The historical review pinned Harness² to a [public commit in google-research/harness2](https://github.com/google-research/harness2/commit/1cfe254e8d25b15f37048c3730134686abe60335). The paper version is [arXiv:2610.14224v1](https://arxiv.org/html/2610.14224v1). The upstream loop proposes candidates, probes them in pairs, and combines them selectively. The loop permits baseline retention.
 
-作者在 WorkBuddy 的指定协议下报告：GLM-5 配合 OpenCode 的均分从 64.2 增至 75.7，增加 11.5 分；配合 Codex 的均分从 64.4 增至 75.3，增加 10.9 分。论文报告了三次运行的均值和标准差。每次运行都打乱任务顺序。这些结果属于作者的模型、框架和基准组合。它们不是本次适配的成绩。
+Under the specified WorkBuddy protocol, the authors reported that GLM-5 with OpenCode increased its mean score from 64.2 to 75.7, a gain of 11.5 points. With Codex, the mean increased from 64.4 to 75.3, a gain of 10.9 points. The paper reports means and standard deviations across three runs. Each run shuffles task order. These results belong to the authors' combinations of models, harnesses, and benchmarks. They are not results of this adaptation.
 
-本次在已有评估参考文档中合并了三项机制：
+The adaptation integrated three mechanisms into the existing evaluation reference:
 
-| 机制 | 适配后的操作要求 | 证据边界 |
+| Mechanism | Adapted operating requirement | Evidence boundary |
 | --- | --- | --- |
-| 按修改项记录效果 | 给修改项编号，并引用基线与候选的具体行为差异 | 多项同时修改时，单项作用可能仍有混杂 |
-| 选择性组合 | 对每个单元选择保留基线、采用候选或合并修改，再测试最终组合 | 分项通过不保证组合通过 |
-| 按条件复用经验 | 保存适用条件、支持证据、失败例和反例 | 下一任务不能自动继承上一任务的专用配置 |
+| Record effects by change | Number each change and cite specific behavioral differences between baseline and candidate | Simultaneous changes can still confound each change's effect |
+| Selective combination | Choose the baseline, candidate, or merged changes for each unit, then test the final combination | Passing components do not guarantee a passing combination |
+| Reuse experience conditionally | Save applicability conditions, supporting evidence, failure cases, and counterexamples | A later task does not automatically inherit a previous task's specific configuration |
 
-效果记录可以使用“帮助”“损害”“未见效果”和“存在混杂”四种判断。判断必须引用实际比较。缺少隔离证据时，记录应保留“存在混杂”。
+Effect records can use four judgments: “helped,” “harmed,” “no observed effect,” and “confounded.” Each judgment must cite an actual comparison. Without isolating evidence, the record should retain “confounded.”
 
-主技能入口在这次合并中增加了 0 字节。按需参考文档从 8,081 字节增加到 12,406 字节，增加 4,325 字节。改造增加了阅读成本。真实 token、总耗时和金额仍然未知。
+The main skill entry point gained 0 bytes in this integration. The on-demand reference grew from 8,081 bytes to 12,406 bytes, an increase of 4,325 bytes. The change increased reading cost. Actual tokens, total elapsed time, and monetary cost remain unknown.
 
-### 第一轮：候选退步
+### First Round: Candidate Regression
 
-第一轮包含 2 个开发样例和 4 个留出样例。基线通过 6/6。候选通过 5/6，其中留出样例通过 3/4。
+The first round contained 2 development cases and 4 holdout cases. The baseline passed 6/6. The candidate passed 5/6, including 3/4 holdout cases.
 
-失败来自一条验收要求。候选把必须执行的独立验收写成了可选条件。该轮没有通过最终合并验收。实际维护文件恢复到了改造前的参考版本。记录保留了失败候选、评分和恢复后的文件摘要。
+The failure concerned an acceptance requirement. The candidate made mandatory independent acceptance optional. This round failed final integration acceptance. The operator restored the actual maintained file to its pre-adaptation reference version. The record retains the failed candidate, scores, and restored file hash.
 
-这次回退证明了实际文件恢复。它没有证明运行中的智能体会话完成了原生回退。
+This rollback establishes actual file restoration. It does not establish native rollback within a running agent session.
 
-### 第二轮：得分持平，缺陷不同
+### Second Round: Equal Scores, Different Defects
 
-第二轮先冻结新计划。此前曝光的失败样例成为开发回归样例。评估另设 4 个全新留出样例。该轮共包含 3 个开发样例和 4 个留出样例。
+The second round began with a new frozen plan. The previously exposed failure case became a development regression case. The evaluation added 4 entirely new holdout cases. The round contained 3 development cases and 4 holdout cases in total.
 
-| 第二轮项目 | 基线 | 候选 |
+| Second-round measure | Baseline | Candidate |
 | --- | ---: | ---: |
-| 开发样例通过数 | 2/3 | 2/3 |
-| 全新留出样例通过数 | 4/4 | 4/4 |
-| 总通过数 | 6/7 | 6/7 |
+| Development cases passed | 2/3 | 2/3 |
+| New holdout cases passed | 4/4 | 4/4 |
+| Total cases passed | 6/7 | 6/7 |
 
-候选修复了独立验收的可选措辞。候选仍然缺少足够的重复比较。它为每种构建配置安排一次运行，再安排一次独立验收。这个计划无法估计运行波动。基线则保留了独立验收要求不够强的缺陷。
+The candidate corrected the wording that made independent acceptance optional. It still lacked sufficient repeated comparisons. It scheduled one run per build configuration, followed by one independent acceptance check. That plan could not estimate run-to-run variation. The baseline retained a different defect: its independent-acceptance requirement remained too weak.
 
-因此，第二轮属于总分持平。它没有达到完整合成通过。三项机制与验收措辞共同变化。记录无法分离各项修改的因果作用。后续并发增加的入口内容只完成静态核对，没有与新参考文档一起重新接受独立行为评分。
+The second round therefore ended with equal total scores. It did not achieve a complete synthetic pass. The three mechanisms and acceptance wording changed together. The records cannot isolate the causal contribution of each change. Later concurrent additions to the entry point received only static checks. They did not receive another independent behavioral score together with the new reference document.
 
-最终记录保留了已授权的文档改造。该保留决定不代表候选自动获胜。它也不代表真实质量或成本改善。
+The final record retained the authorized documentation changes. That retention decision does not automatically make the candidate the winner. It also does not establish actual quality or cost improvements.
 
-## 自主学习规则与 awesome-rsi 评估
+## Autonomous Learning Rules and the awesome-rsi Review
 
-历史筛选将目录固定到 [lobehub/awesome-rsi 的公开提交](https://github.com/lobehub/awesome-rsi/commit/632ab5065bf579c7d1daa71bdaab801fdefd3698)。条目清单包含 31 个章节、252 个条目和 252 个不同的条目 URL。筛选为每个条目分配了一次用途判断。
+The historical screening pinned the catalog to a [public commit in lobehub/awesome-rsi](https://github.com/lobehub/awesome-rsi/commit/632ab5065bf579c7d1daa71bdaab801fdefd3698). Its inventory contained 31 sections, 252 entries, and 252 distinct entry URLs. The screening assigned one intended-use judgment to each entry.
 
-| 初步用途判断 | 条目数 |
+| Initial intended-use judgment | Entry count |
 | --- | ---: |
-| 需要新的运行框架 | 67 |
-| 既有机制已经覆盖 | 17 |
-| 背景知识 | 59 |
-| 可直接借鉴的候选方法 | 27 |
-| 涉及训练或基础设施 | 71 |
-| 来源尚未核实 | 11 |
-| 合计 | 252 |
+| Requires a new harness | 67 |
+| Existing mechanisms already cover it | 17 |
+| Background knowledge | 59 |
+| Candidate method for direct reuse | 27 |
+| Involves training or infrastructure | 71 |
+| Source not yet verified | 11 |
+| Total | 252 |
 
-用途判断只是相关性筛选。它不是对所有条目描述的独立验证。研究读取了 12 个研究对象的方法与限制。这些核查覆盖了 16 个目录条目。其余 236 个条目仍停留在目录证据层级。12 个研究对象与 16 个条目属于不同计数单位。
+These judgments screen relevance only. They do not independently validate every entry description. The research read methods and limitations for 12 research subjects. Those reviews covered 16 catalog entries. The remaining 236 entries stayed at the catalog-evidence level. The 12 subjects and 16 entries use different counting units.
 
-这次学习带来三个评估区分：任务内得分提高、跨任务保留收益、改进过程自身能力提高。递归结构不能单独证明第三项。可获取的代码也不能单独证明完整复现。任务来源、评分逻辑、数据、评估环境和缺失组件都影响复现结论。
+The learning established three separate evaluation concepts: better scores within a task, retained gains across tasks, and stronger capability in the improvement process itself. A recursive structure alone does not establish the third. Available code alone also does not establish complete reproduction. Task sources, scoring logic, data, evaluation environment, and missing components all affect reproduction conclusions.
 
-自主学习要求合并进了既有全局要求。原创概述如下：遇到相关陌生资料时，先核对原始来源；根据当前任务完成必要学习；继续执行已经授权的可逆适配；核对实际结果；缺少必要信息时，只询问缺项。学习过程继续遵守只读范围、保护数据、账号、付费、生产和不可逆操作的授权边界。
+The autonomous-learning requirements joined the existing global requirements. An original summary follows: when unfamiliar materials relate to the task, check original sources first. Complete the learning that the current task requires. Continue already authorized reversible adaptation. Check actual results. When necessary information is missing, ask only for the missing item. Learning must continue to respect authorization boundaries for read-only scope, protected data, accounts, spending, production, and irreversible operations.
 
-规则文件增加了 658 字节。独立合成评分通过了 4/4 个情境和 12 项强制要求。评分没有发现答案认可禁止行为。该结果没有证明新会话自动加载、真实任务完成或跨任务泛化。
+The rules file grew by 658 bytes. Independent synthetic scoring passed 4/4 scenarios and 12 mandatory requirements. The scorer found no answer that endorsed prohibited behavior. This result does not establish automatic loading in new sessions, completion of real tasks, or generalization across tasks.
 
-## 可复用的操作顺序
+## Reusable Operating Sequence
 
-以下顺序概括历史方法。具体任务仍需要自己的读取范围、授权和验收标准。
+The sequence below summarizes the historical method. Each actual task still needs its own read scope, authorization, and acceptance criteria.
 
-1. 核对任务归属与资料范围。先筛允许来源，再读正文。
-2. 固定原始来源版本。记录提交、观察日期和实际覆盖内容。
-3. 区分作者报告、源码事实、合成行为和实际运行证据。
-4. 检查既有技能的职责。优先保留、合并或替换局部规则。
-5. 保存真实基线。记录内容摘要、恢复材料和文件模式。
-6. 固定候选、预算和评价标准。隔离开发样例与未曝光的留出样例。
-7. 执行配对比较。匹配相关条件，并为运行波动安排重复次数。
-8. 逐项记录帮助、损害、未见效果或混杂。测试实际采用的最终组合。
-9. 先检查硬约束，再比较收益与成本。缺少完整成本时，保留未知项。
-10. 核对当前授权，再应用候选。回读应用状态，再执行真实任务验收。
-11. 保留失败证据与反例。将已曝光样例转为回归材料，另设新留出材料。
-12. 核对临时资源归属，再完成清理。将清理回执与验收结果分开记录。
+1. Check task ownership and material scope. Filter for permitted sources before reading the text.
+2. Pin the original source version. Record the commit, observation date, and actual coverage.
+3. Distinguish author reports, source facts, synthetic behavior, and actual runtime evidence.
+4. Check the responsibilities of existing skills. Prefer retention, integration, or replacement of local rules.
+5. Save the actual baseline. Record content hashes, recovery materials, and file modes.
+6. Freeze the candidate, budget, and evaluation criteria. Isolate development cases from unexposed holdout cases.
+7. Run paired comparisons. Match relevant conditions and schedule repetitions for run-to-run variation.
+8. Record helped, harmed, no observed effect, or confounded for each change. Test the final combination that will actually apply.
+9. Check hard constraints first, then compare gains and costs. Keep unknowns when full cost data is missing.
+10. Check current authorization before applying the candidate. Read back the applied state, then perform acceptance on the real task.
+11. Retain failure evidence and counterexamples. Turn exposed cases into regression material and prepare fresh holdout material.
+12. Check temporary-resource ownership before cleanup. Record cleanup receipts separately from acceptance results.
 
-本次记录支持“可审计地改造流程”这一结论。真实运行效果、完整成本、稳定性和跨任务收益仍需独立证据。缺少这些数据时，不能宣布帕累托改进。卡尔多比较也需要明确的损益标准、权重和可核实的补偿条件。
+These records support the conclusion that workflow changes can remain auditable. Actual runtime effects, complete costs, stability, and gains across tasks still require independent evidence. Without those data, a Pareto improvement claim lacks support. A Kaldor comparison also requires explicit gain and loss criteria, weights, and verifiable compensation conditions.
 
-## 公开来源与复用范围
+## Public Sources and Reuse Scope
 
-本文以原创中文概述机制。本文没有复制第三方技能全文、文章正文或源码。FlashRSI 与 Harness² 的历史核查记录注明了 Apache-2.0 框架许可；上游数据、模型、基准和其他组件的条款各自适用。目录收录不构成安装或再分发授权。
+The original article summarized these mechanisms in original Chinese prose. This English translation retains that summary. The article does not copy complete third-party skills, article text, or source code. The historical FlashRSI and Harness² reviews recorded Apache-2.0 framework licenses. Upstream data, models, benchmarks, and other components retain their own terms. Catalog inclusion grants no installation or redistribution authorization.
 
-公开链接固定了当时的研究对象。本文没有在导出时重新联网验证网页，也没有将历史结果转为当前产品操作承诺。
+The public links pin the historical research subjects. The original export did not revalidate web pages online. It did not convert historical results into commitments about current product operation.

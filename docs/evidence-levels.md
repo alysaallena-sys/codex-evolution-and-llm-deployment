@@ -1,42 +1,42 @@
-# 证据与复现说明
+# Evidence and Reproduction
 
-学习记录应让读者能定位原始资料、理解实际做过的检查，并判断是否适合自己的环境。
+A learning record should help readers locate the original material, understand the checks actually performed and judge whether the method fits their environment.
 
-## 证据类型
+## Evidence types
 
-| 类型 | 实际支持的结论 | 需要另行验证的内容 |
+| Type | What it supports | What requires separate verification |
 | --- | --- | --- |
-| 作者或项目声明 | 对方公开写了什么 | 声明是否在目标环境成立 |
-| 原始来源或源码核对 | 指定版本的文档、接口或实现内容 | 未阅读路径和实际运行行为 |
-| 静态或合成检查 | 指定输入与断言的结果 | 真实设备、网络、账号和产品效果 |
-| 本地真实运行 | 指定环境中实际执行的结果 | 不同硬件、负载、模型或输入的表现 |
-| 设备或服务验收 | 指定设备或服务的最终读回 | 全平台兼容性和持续可用性 |
-| 发布读回 | 某个确定版本已经可访问 | 后续改动、业务效果和性能收益 |
+| Author or project statement | What the source publicly states | Whether the statement holds in the target environment |
+| Original-source or code review | The documents, interfaces or implementation at a specified revision | Unread paths and actual runtime behavior |
+| Static or synthetic checks | Results for specified inputs and assertions | Real devices, networks, accounts and product effects |
+| Real local execution | Actual behavior in the specified environment | Behavior on other hardware, loads, models or inputs |
+| Device or service acceptance | The final readback on a specified device or service | Cross-platform compatibility and continued availability |
+| Publication readback | A particular published revision is accessible | Later changes, business outcomes and performance gains |
 
-这些类型用于说明范围。文档可以同时包含多种类型。
+These types describe scope. A document can contain several types of evidence.
 
-## 一项记录至少写清什么
+## Minimum record
 
-1. 要解决的问题。
-2. 原始链接、固定提交或版本，以及观察日期。
-3. 相关环境条件。示例应使用通用路径和占位符。
-4. 实际执行步骤与输入范围。
-5. 可读回的结果，以及检查通过或失败的含义。
-6. 尚未验证的事项。
-7. 对已有方法的决定：保持、合并、替换或撤回。
+1. The problem to solve.
+2. Original links, pinned commits or versions, and observation dates.
+3. Relevant environment conditions. Use generic paths and placeholders in examples.
+4. Steps actually executed and the input scope.
+5. Results that can be read back, and the meaning of a pass or failure.
+6. Items that remain unverified.
+7. The decision about the existing method: keep, merge, replace or withdraw.
 
-## 固定版本和当前版本
+## Pinned and current versions
 
-研究固定提交时，保留该提交地址。描述当前功能、价格或服务默认值时，核对对应官方来源，并写明观察日期。
+For research on a pinned commit, retain its URL. For current functionality, pricing or service defaults, check the official source and record the observation date.
 
-代码提交不自动固定模型权重。模型记录应另列权重来源、revision、量化方式、精度和模型许可。缺少这些数据时，明确保留缺口。
+A code commit does not pin model weights. Record the weight source, revision, quantization, precision and model license separately. State any missing information.
 
-## 比较改动
+## Comparing changes
 
-比较前先固定输入、环境、方法和通过条件。保留基线、失败、重试和恢复路径。只有实际测量支持时，才报告质量、速度、成本或上下文收益。
+Fix the input, environment, method and pass criteria before comparison. Retain the baseline, failures, retries and recovery path. Report quality, speed, cost or context gains only when actual measurements support them.
 
-没有适用的新改动时，可以保留现有方法，并写明依据。不能把计划、保存文档或增加技能数量当成效果提升。
+When no applicable improvement exists, keep the current method and explain why. A plan, a saved document or a larger skill count does not establish better results.
 
-## 复现范围
+## Reproduction scope
 
-本仓库保留能够公开的复现说明。私有原件及含敏感信息的运行日志不随笔记发布。脱敏摘要不能替代缺失的原始验证；文档应明确保留这一限制。
+This repository retains reproduction instructions that can be made public. Private originals and sensitive execution logs stay outside the notes. A sanitized summary cannot replace missing original validation. State that limitation explicitly.

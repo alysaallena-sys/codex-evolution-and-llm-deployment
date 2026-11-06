@@ -1,39 +1,41 @@
-# Codex 进化与大模型部署
+# Codex Evolution and LLM Deployment
 
-这里整理两类学习成果：Codex 工作流改进，以及大模型部署与推理工具的研究和验证。
+This repository collects learning outcomes in two areas: improvements to Codex workflows, and research and validation for LLM deployment and inference tools.
 
-“进化”指任务组织、上下文管理、工具使用和验证流程的改进。每项结论都注明来源、版本和已经完成的验证范围。
+Here, **evolution** means improving task coordination, context management, tool use and verification. Each technical conclusion identifies its source, version and completed validation scope.
 
-## 从这里开始
+## Start here
 
-| 方向 | 阅读入口 | 关注的问题 |
+| Area | Entry point | Questions covered |
 | --- | --- | --- |
-| Codex 进化 | [Codex 学习目录](docs/codex/README.md) | 如何选择工具、管理上下文、维护技能，并核对改动是否实际生效 |
-| 大模型部署 | [大模型学习目录](docs/llm/README.md) | 如何区分本地推理、远端网关、候选方案、真实运行和部署结果 |
-| 验证口径 | [证据与复现说明](docs/evidence-levels.md) | 一份学习记录能证明什么，还缺什么 |
-| 后续维护 | [贡献与更新](CONTRIBUTING.md) | 如何更新已有结论，避免重复堆砌材料 |
+| Codex evolution | [Codex learning index](docs/codex/README.md) | How to choose tools, manage context, maintain skills and check whether a change actually takes effect |
+| LLM deployment | [LLM learning index](docs/llm/README.md) | How to distinguish local inference, remote gateways, candidates, real execution and deployment results |
+| Validation | [Evidence and reproduction](docs/evidence-levels.md) | What a learning record establishes and what still requires verification |
+| Maintenance | [Contributing and updates](CONTRIBUTING.md) | How to revise existing conclusions without accumulating duplicate material |
 
-## 怎么读这些笔记
+## How to read these notes
 
-先看文档中的版本和观察日期，再看“已验证”和“未验证”部分。固定提交的研究结论只适用于对应版本。需要执行部署时，应重新核对当前依赖、模型许可和环境条件。
+Check each document's version and observation date, then read its verified results and unverified scope. Research tied to a commit applies to that revision. Before deployment, recheck current dependencies, model licenses and environment requirements.
 
-本文使用以下表述：
+These notes distinguish four outcomes:
 
-- **来源核对**：已经阅读指定原文或固定版本源码。
-- **知识采用**：已经将结论接入现有工作方法或专业说明。
-- **本地验证**：已经执行文档注明的检查或测试。
-- **部署验收**：已经在指定环境读回服务结果。
+- **Source review:** the specified original material or pinned source code was read.
+- **Knowledge adoption:** a conclusion was incorporated into an existing method or professional guide.
+- **Local validation:** the checks or tests named in the document were executed.
+- **Deployment acceptance:** the target service's result was read back in the specified environment.
 
-具体范围以每篇记录为准。工具返回成功、文件写入完成和模型效果提升需要各自的证据。
+Each document defines its actual scope. Tool success, a completed file write and better model performance each require their own evidence.
 
-## 本仓库收录什么
+## What this repository contains
 
-首版收录原创学习摘要、适配判断、复现方法和上游链接。具体技术结论由两个专业方向的既有成果整理而来。文档保留失败和未验项目。
+The first edition contains original learning summaries, adaptation decisions, reproduction methods and upstream links. Two professional workstreams supplied the underlying results. The notes retain failures and unverified items.
 
-公开内容使用通用路径与示例参数。私有原件、原始会话、账号配置、内部验收材料和模型权重留在原工作区。
+Public examples use generic paths and parameters. Private originals, raw conversations, account configurations, internal acceptance records and model weights remain outside this repository.
 
-## 来源与使用
+English is the primary language of the repository. The original Chinese edition remains available in Git history.
 
-每篇文档就近列出原始资料及版本。第三方项目的代码许可、模型权重许可、服务条款和费用分别适用。参见 [来源与使用说明](NOTICE.md)。
+## Sources and use
 
-整理日期：2026-11-06。
+Documents place original sources and versions near the relevant claims. Third-party code licenses, model-weight licenses, service terms and charges apply separately. See [Sources and use](NOTICE.md).
+
+Original compilation and English revision: 2026-11-06.

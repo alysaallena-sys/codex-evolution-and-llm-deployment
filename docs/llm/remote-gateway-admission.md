@@ -1,116 +1,116 @@
-# 远端模型网关准入：配额、费用、模型身份与内容出口
+# Remote Model Gateway Admission: Quotas, Costs, Model Identity, and Content Destinations
 
-本文给出远端模型网关的候选筛选方法。案例固定为 `tashfeenahmed/freellmapi@73e3f05843c6d6d7041171225a27defa6a82ecf1`。资料包标记时间为 2026-11-06。本文继承资料包对部分源码和三家服务商官方说明的核查结论。本文没有重新访问上游页面。
+This article presents a method for screening remote model gateways. The case fixes the source at `tashfeenahmed/freellmapi@73e3f05843c6d6d7041171225a27defa6a82ecf1`. The source package bears the date 2026-11-06. This article inherits the package's review findings for selected source code paths and official documentation from three providers. It did not revisit upstream pages.
 
-本文完成知识整理与文稿静态核对。本文没有运行网关，没有调用模型，也没有验证真实账单。下文的服务商配额只代表 2026-11-06 资料包中的官方核查快照。读者需要在实际接入前重新核对条款与账号资格。
+The work completed knowledge organization and static document checks. It did not run the gateway, call a model, or verify an actual bill. Provider quotas below represent only the official documentation snapshots in the source package dated 2026-11-06. Readers must recheck terms and account eligibility before actual integration.
 
-## 先确定网关的身份
+## Identify the gateway's role first
 
-FreeLLMAPI 将请求转发给远端服务商。它不提供本地模型权重。部署网关程序，也不能证明模型在本机完成推理。
+FreeLLMAPI forwards requests to remote providers. It does not supply local model weights. Deploying the gateway program does not establish local model inference.
 
-本地权重准入通常需要核对模型来源、权重版本、权重许可、格式、量化、内存和磁盘。远端网关准入还需要核对上游账号、配额归属、计费条件和请求内容的接收方。两组条件各有用途。
+Admission of local weights usually requires review of model provenance, weight version, weight license, format, quantization, memory, and disk space. A remote gateway also requires review of upstream accounts, quota ownership, billing conditions, and recipients of request content. Both sets of conditions serve specific purposes.
 
-作者统计的模型数量、端点数量和月 token 总量，只能说明统计口径下的目录规模。它们不能证明某个账号实际拥有对应额度。目录订阅也不包含推理额度。[固定版本 README](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/README.md)
+The author's model counts, endpoint counts, and monthly token totals describe catalog scale under the author's counting method. They do not establish that a particular account has those quotas. A catalog subscription also does not include inference quota. Source: [fixed version README](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/README.md).
 
-## 按账号或项目计算共享配额
+## Calculate shared quotas by account or project
 
-先找出配额所属的实体，再统计额度。多个 key 可能使用同一账号或同一项目的额度。直接将“单份额度 × key 数量”作为总额度，会重复计算共享池。
+Identify the entity that owns a quota before calculating the total. Multiple keys may share one account or project quota. Multiplying a single quota by the number of keys can count the same shared pool more than once.
 
-下表只复述 **2026-11-06 资料包中的三家官方核查快照**。表内数字不是当前可用额度，也不是任何账号的运行结果。
+The table restates only **the three official documentation snapshots in the source package dated 2026-11-06**. These figures do not represent current available quotas or runtime results for any account.
 
-| 服务商 | 资料包中的官方条件 | 候选准入判断 |
+| Provider | Official conditions in the source package | Candidate admission assessment |
 | --- | --- | --- |
-| Google Gemini API | 项目共享配额；key 不是独立配额单位。 | 先按项目合并 key，再核对该项目的实际限额。 |
-| OpenRouter | 未达充值条件时，免费模型为 50 次请求/日；达到资料所列充值条件后，为 1000 次请求/日。失败请求也计入日限额。 | 固定源码默认使用 1000 的条件不足。先核对账号资格，再设定本地限制。 |
-| Cloudflare Workers AI | 免费额度为每账号每日 10,000 neurons；Paid 条件可能产生超额费用。 | 按账号合并使用量。把本地估算门槛与服务商计费限制分开核对。 |
+| Google Gemini API | Quotas apply to a shared project. Keys do not have independent quotas. | Group keys by project first. Then check the project's actual limits. |
+| OpenRouter | Free models allow 50 requests per day before the documented credit purchase condition; they allow 1000 requests per day after that condition. Failed requests also count toward the daily limit. | The fixed source code's default of 1000 lacks sufficient conditions by itself. Check account eligibility before setting local limits. |
+| Cloudflare Workers AI | The free allocation is 10,000 neurons per account per day. Paid conditions may incur overage charges. | Aggregate usage by account. Check local estimation thresholds separately from provider billing limits. |
 
-官方来源：[Gemini 限额说明](https://ai.google.dev/gemini-api/docs/rate-limits)、[OpenRouter 限额说明](https://openrouter.ai/docs/api_reference/limits)、[OpenRouter 免费模型目录](https://openrouter.ai/collections/free-models)、[Cloudflare Workers AI 定价](https://developers.cloudflare.com/workers-ai/platform/pricing/)。这些页面可能更新；本文没有检查它们在资料包日期之后的变化。
+Official sources: [Gemini rate limits](https://ai.google.dev/gemini-api/docs/rate-limits), [OpenRouter limits](https://openrouter.ai/docs/api_reference/limits), [OpenRouter free model catalog](https://openrouter.ai/collections/free-models), and [Cloudflare Workers AI pricing](https://developers.cloudflare.com/workers-ai/platform/pricing/). These pages can change. This article did not check changes after the source package date.
 
-## 分开成功账本、失败消耗与真实账单
+## Separate the success ledger, failed-attempt consumption, and actual bills
 
-资料包记录，固定版本的月度 cap 默认值为 `0`。这里的 `0` 表示无限制。接入者需要主动设置限制。[月度预算实现](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/services/key-budget.ts)
+The source package recorded a default monthly cap of `0` in the fixed version. Here, `0` means unlimited. Integrators must actively set a limit. Source: [monthly budget implementation](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/services/key-budget.ts).
 
-| 记录或机制 | 它能说明什么 | 它不能单独证明什么 |
+| Record or mechanism | What it establishes | What it does not establish alone |
 | --- | --- | --- |
-| token 估算 | 本地规则估计的请求规模。 | 服务商最终结算的精确用量。 |
-| SQLite 成功请求月账本 | 网关记录的成功请求累计量。 | 全部失败尝试的消耗与全部费用。 |
-| 当前进程的内存 lease | 当前进程登记的临时占用。 | 跨进程、跨 key、跨客户端的完整服务商账目。 |
-| 本地限流和同步 | 网关按本地状态执行限制。 | 服务商已经拒绝所有超额请求。 |
-| 服务商用量与账单 | 服务商对实际账号的用量和结算记录。 | 请求内容、实际模型和客户端兼容性已经通过验收。 |
+| Token estimate | Request size according to local estimation rules | Exact usage for the provider's final settlement |
+| SQLite monthly ledger of successful requests | Cumulative successful requests that the gateway recorded | All consumption from failed attempts or all charges |
+| In-memory lease in the current process | Temporary allocation that the current process registered | Complete provider accounting across processes, keys, and clients |
+| Local rate limiting and synchronization | The gateway applies limits according to local state | The provider has rejected every over-limit request |
+| Provider usage records and bills | Usage and settlement records for the actual account | Acceptance of request content handling, actual model identity, or client compatibility |
 
-失败请求可能消耗限额。OpenRouter 的包内官方快照明确将失败请求计入日限额。失败请求是否产生金钱费用，需要按实际服务商和实际请求重新核对。不能从“请求失败”推导“没有消耗”。[限流实现](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/services/ratelimit.ts)
+Failed requests can consume quota. The package's official OpenRouter snapshot explicitly counted failed requests toward the daily limit. Whether a failed request incurs a monetary charge requires a new check for the actual provider and request. Request failure does not establish zero consumption. Source: [rate limiting implementation](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/services/ratelimit.ts).
 
-Cloudflare 路径中的本地 9000 neurons 估算门槛，不是服务商的硬性账单上限。估算误差、共享账号中的其他请求和最佳努力同步，都可能造成两侧账目差异。Paid 超额条件也需要单独处理。[Cloudflare 用量处理](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/services/cloudflare-neurons.ts)
+The Cloudflare path's local estimation threshold of 9000 neurons does not constitute a hard provider billing cap. Estimation error, other requests on the shared account, and best-effort synchronization can cause differences between the two sets of records. Paid overage conditions also require separate treatment. Source: [Cloudflare usage handling](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/services/cloudflare-neurons.ts).
 
-因此，“免费模型”“设置了本地 cap”“只记录成功请求”和“请求失败”都不足以保证零费用。零费用主张需要实际账号条件、失败消耗记录和服务商账单共同支持。
+“Free model,” “local cap configured,” “successful requests only in the ledger,” and “request failed” therefore do not guarantee zero cost. A zero-cost claim requires evidence of actual account conditions, consumption from failed attempts, and provider bills.
 
-## 给重试次数和时间预算写清限定
+## State the limits of retry counts and time budgets
 
-资料包记录的默认配置为 20 次总尝试与 45 秒基础预算。前两次尝试有预算豁免。成功请求的历史首字节等待时间（TTFB）还可能放宽预算。因此，这个默认值不能证明请求会在 45 秒内严格停止。[回退循环](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/lib/fallback-loop.ts)、[时间预算处理](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/lib/ttfb-budget.ts#L162-L179)
+The source package recorded defaults of 20 total attempts and a 45-second base budget. The first two attempts had budget exemptions. Historical time to first byte (TTFB) from successful requests could also relax the budget. These defaults therefore do not establish a strict stop within 45 seconds. Sources: [fallback loop](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/lib/fallback-loop.ts) and [time budget handling](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/lib/ttfb-budget.ts#L162-L179).
 
-准入记录需要分别写出总尝试次数、时间预算、豁免条件和放宽条件。后续若获准运行，还需要检查取消请求、超时返回和上游中止的实际行为。重试预算也不能代替费用预算。
+Admission records must separately state the total attempt count, time budget, exemption conditions, and relaxation conditions. If later execution receives authorization, it must also check actual cancellation, timeout responses, and upstream abort behavior. A retry budget does not replace a cost budget.
 
-## 用实际来源确认模型身份
+## Establish model identity from the actual source
 
-资料包记录，`opus`、`sonnet`、`haiku` 默认映射到 `auto` 池。别名本身不能证明请求使用了对应的 Claude 模型。应核对最终服务商、实际模型标识和返回结果中的来源信息。[别名映射实现](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/services/anthropic-map.ts)
+The source package recorded default mappings from `opus`, `sonnet`, and `haiku` to the `auto` pool. An alias alone does not establish use of the corresponding Claude model. Check the final provider, actual model identifier, and provenance information in the response. Source: [alias mapping implementation](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/services/anthropic-map.ts).
 
-Responses 或 Messages 协议转换，只说明网关提供了相应接口转换路径。它不能证明具体客户端已经兼容。客户端验收还需要实际请求、流式输出、工具调用和错误处理证据。本文没有完成这些验收。[免费模型路由](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/routes/free-tier.ts)、[回退路由](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/routes/fallback.ts)
+Responses or Messages protocol conversion establishes only that the gateway offers the corresponding interface conversion path. It does not establish compatibility with a particular client. Client acceptance also requires evidence from actual requests, streaming output, tool calls, and error handling. This article did not complete those acceptance checks. Sources: [free model route](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/routes/free-tier.ts) and [fallback route](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/routes/fallback.ts).
 
-## 分开检查内容出口、日志与缓存
+## Check content destinations, logs, and caches separately
 
-资料包中的固定源码审查记录了三项需要分别处理的条件：
+The review of fixed source code in the package recorded three conditions that require separate treatment:
 
-1. analytics 默认保存原始 IP 与 User-Agent。该行为与文档中的 NoPII、IP-hash 描述不一致。`REQUEST_ANALYTICS_LOG_CLIENT=false` 只对应关闭这项客户端信息记录。它不能证明所有日志均已关闭。
-2. key 的静态加密用于保护存储中的 key。它不能阻止上游服务商读取收到的 prompt。
-3. 可选 SQLite 响应缓存使用明文。缓存的启用条件、访问范围和保留时间需要单独核对。
+1. Analytics saved raw IP addresses and User-Agent values by default. This behavior differed from the documentation's NoPII and IP-hash descriptions. `REQUEST_ANALYTICS_LOG_CLIENT=false` disabled only this client information record. It did not establish that all logging had stopped.
+2. Encryption of keys at rest protected stored keys. It did not prevent upstream providers from reading the prompts they received.
+3. The optional SQLite response cache used plaintext. Its activation conditions, access scope, and retention period require separate checks.
 
-固定来源：[客户端信息处理](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/lib/client-context.ts)、[请求日志处理](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/lib/request-log.ts)、[固定版本 README](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/README.md)。本文沿用资料包对缓存和加密的摘要，没有独立复核其全部实现路径。
+Fixed sources: [client information handling](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/lib/client-context.ts), [request log handling](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/lib/request-log.ts), and [fixed version README](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/README.md). This article retains the package's summaries of caching and encryption. It did not independently review every implementation path.
 
-资料包还记录，目录默认每 12 小时访问签名更新服务。该交互包含版本信息和可选 license 信息。这一条记录不能穷尽网关的全部外连行为。[目录同步实现](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/services/catalog-sync.ts)
+The package also recorded that the catalog contacted a signed update service every 12 hours by default. That interaction included version information and optional license information. This record does not exhaust all outbound gateway behavior. Source: [catalog synchronization implementation](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/server/src/services/catalog-sync.ts).
 
-## 复用同一套准入步骤
+## Reuse one admission procedure
 
-1. **固定来源。** 保存仓库名、提交、核查日期和许可。记录每条结论来自原始文档、源码审查还是运行观察。
-2. **确定推理位置。** 标明本地权重或远端服务商。远端路径需要列出最终内容接收方。
-3. **合并共享额度。** 按实际账号或项目归并 key。核对免费、充值和 Paid 条件。不要按 key 数量累加共享额度。
-4. **核对费用边界。** 写明 cap 的默认含义。分列成功用量、失败尝试、本地估算和服务商账单。没有账单证据时，不作零费用承诺。
-5. **核对重试边界。** 写明次数、基础预算、豁免和放宽条件。需要严格截止时，把实际停止行为列为独立验收项。
-6. **核对模型来源。** 追踪别名到实际服务商与模型标识。把协议转换与具体客户端兼容性分开验收。
-7. **核对内容与留存。** 检查 prompt 出口、原始客户端信息、请求日志、明文缓存和目录更新交互。逐项记录开关、默认值与验证缺口。
-8. **给出有限决定。** 条件完整时，只批准已验证的用途。条件不足时，保留现有部署决定。缺少运行证据时，只纳入候选知识。
+1. **Fix the source.** Retain the repository name, commit, review date, and license. Record whether each conclusion comes from original documentation, source code review, or runtime observation.
+2. **Identify the inference location.** Specify local weights or remote providers. For remote paths, list the final recipients of content.
+3. **Aggregate shared quotas.** Group keys by actual account or project. Check free, credit purchase, and Paid conditions. Do not multiply shared quotas by key count.
+4. **Check cost limits.** State the default meaning of the cap. Separate successful usage, failed attempts, local estimates, and provider bills. Do not promise zero cost without billing evidence.
+5. **Check retry limits.** State the attempt count, base budget, exemptions, and relaxation conditions. When a strict deadline matters, make actual stopping behavior a separate acceptance condition.
+6. **Check model provenance.** Trace aliases to actual providers and model identifiers. Check protocol conversion separately from compatibility with a specific client.
+7. **Check content and retention.** Review prompt destinations, raw client information, request logs, plaintext caches, and catalog update interactions. Record switches, defaults, and verification gaps for each item.
+8. **Make a bounded decision.** Approve only verified uses when the conditions are complete. Retain the existing deployment decision when conditions are insufficient. Adopt candidate screening knowledge only when runtime evidence is absent.
 
-这些步骤可以在文档审查阶段完成初筛。账号操作、模型调用、付费、生产变更和发布需要各自的授权。文档初筛不扩大执行权限。
+These steps support initial screening during document review. Account operations, model calls, payments, production changes, and publication each require their own authorization. Document screening does not expand execution permissions.
 
-## 纠正常见主张
+## Correct common claims
 
-| 原主张 | 可接受的表述 |
+| Original claim | Acceptable statement |
 | --- | --- |
-| “有多个 key，所以额度成倍增加。” | “先按账号或项目合并共享池，再核对实际额度。” |
-| “月 cap 为 0，所以没有费用。” | “该固定版本用 0 表示无限制。实际费用仍需核账。” |
-| “账本只记成功，所以失败没有消耗。” | “成功账本未覆盖全部失败消耗。逐服务商核对失败规则。” |
-| “默认预算为 45 秒，所以必定在 45 秒内停止。” | “默认基础预算存在豁免与放宽条件。严格截止尚需运行验收。” |
-| “请求使用 opus 别名，所以实际模型是 Claude。” | “别名默认进入 auto 池。实际模型来源尚需核对。” |
-| “key 已加密，所以 prompt 不会离开本地。” | “静态 key 加密不能限制上游对 prompt 的接收。” |
-| “关闭客户端信息记录，所以全部日志都关闭。” | “该开关只覆盖指定记录项。其他日志和缓存需要单独检查。” |
-| “代码许可为 MIT，所以服务商、模型和费用没有限制。” | “MIT 覆盖对应代码。模型权利、服务商条款和计费条件另行核对。” |
+| “Multiple keys multiply the quota.” | “Aggregate the shared pool by account or project first. Then check the actual quota.” |
+| “The monthly cap is 0, so there are no charges.” | “This fixed version uses 0 to mean unlimited. Actual charges still require reconciliation.” |
+| “The ledger records only successes, so failures consume nothing.” | “The success ledger does not cover all failed-attempt consumption. Check failure rules for each provider.” |
+| “The default budget is 45 seconds, so requests always stop within 45 seconds.” | “The base budget has exemptions and relaxation conditions. A strict deadline still requires runtime acceptance.” |
+| “The request uses the opus alias, so the actual model is Claude.” | “The alias enters the auto pool by default. The actual model source still requires verification.” |
+| “Key encryption keeps prompts local.” | “Key encryption at rest does not prevent upstream receipt of prompts.” |
+| “Disabling client information records disables all logs.” | “The switch covers specified records only. Other logs and caches require separate checks.” |
+| “The MIT code license removes provider, model, and cost restrictions.” | “MIT covers the corresponding code. Model rights, provider terms, and billing conditions require separate checks.” |
 
-## 按证据层级验收
+## Apply acceptance checks at each evidence level
 
-| 层级 | 通过所需证据 | 本文状态 |
+| Level | Evidence required for a pass | Status in this article |
 | --- | --- | --- |
-| 来源与版本 | 固定提交、日期、许可与原始链接。 | 已从资料包继承；本文未重新打开上游。 |
-| 静态知识整理 | 结论对应来源范围；文稿保留限制；文本无越级主张。 | 已完成。 |
-| 网关运行 | 实际路由、重试、取消、日志和缓存的观察记录。 | 未验证。 |
-| 客户端与模型 | 指定客户端完成目标流程；实际模型来源明确。 | 未验证。 |
-| 配额与账单 | 实际账号资格、共享池用量、失败消耗与账单核对。 | 未验证。 |
-| 产品或生产 | 指定用途达到验收条件；发布对象与回退条件明确。 | 未验证。 |
+| Sources and versions | Fixed commit, date, license, and original links | Inherited from the source package. This article did not reopen upstream sources. |
+| Static knowledge organization | Conclusions match source scope; the article retains limitations and avoids claims beyond the evidence | Complete. |
+| Gateway execution | Observations of actual routing, retries, cancellation, logs, and caches | Unverified. |
+| Client and model | The specified client completes the target workflow; actual model provenance is clear | Unverified. |
+| Quotas and bills | Actual account eligibility, shared pool usage, failed-attempt consumption, and bill reconciliation | Unverified. |
+| Product or production | The specified use meets acceptance conditions; the publication target and rollback conditions are clear | Unverified. |
 
-本次适配决定仅为：采用远端网关的候选准入知识。现有部署方案保持不变。本文不构成网关部署、实际模型调用或零费用运行的验收结论。
+The adaptation decision covered only adoption of remote gateway candidate screening knowledge. It retained the existing deployment plan. This article does not establish gateway deployment, actual model calls, or zero-cost operation.
 
-## 来源范围与权利边界
+## Source scope and rights
 
-固定上游为 [FreeLLMAPI 提交 73e3f05843c6d6d7041171225a27defa6a82ecf1](https://github.com/tashfeenahmed/freellmapi/tree/73e3f05843c6d6d7041171225a27defa6a82ecf1)。该提交的代码许可为 [MIT](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/LICENSE)。代码许可不替代服务商条款、模型许可或计费规则。
+The fixed upstream source is [FreeLLMAPI commit 73e3f05843c6d6d7041171225a27defa6a82ecf1](https://github.com/tashfeenahmed/freellmapi/tree/73e3f05843c6d6d7041171225a27defa6a82ecf1). The code at that commit uses [MIT](https://github.com/tashfeenahmed/freellmapi/blob/73e3f05843c6d6d7041171225a27defa6a82ecf1/LICENSE). The code license does not replace provider terms, model licenses, or billing rules.
 
-本文采用原创中文提炼。本文没有复制源码、完整文章或模型权重。源码路径与配置标识仅用于定位核查对象。
+This article presents an original summary, now in English. It does not reproduce source code, complete articles, or model weights. Source paths and configuration identifiers serve only to locate review subjects.
 
-资料范围覆盖部分固定源码路径与三家服务商的包内官方核查。资料范围不覆盖全部 34 家服务商、完整安全审计、完整许可审计、客户端运行、真实网络与日志输出、实际模型来源、真实账单或生产验收。
+The material covers selected fixed source paths and the package's official documentation checks for three providers. It does not cover all 34 providers, a full security audit, a full license audit, client execution, actual network and log output, actual model provenance, real bills, or production acceptance.

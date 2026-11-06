@@ -1,55 +1,55 @@
-# 研究取舍：跨宿主可复用的机制
+# Research Decisions: Mechanisms That Transfer Across Hosts
 
-历史核查日期：2026-11-02。导出整理日期：2026-11-06。
+Historical review date: 2026-11-02. Export compilation date: 2026-11-06.
 
-本页总结六类研究的适配判断。取材范围是当时保留的来源核查与验收记录。本次没有重新抓取上游，也没有重跑模型或安装这些项目。以下判断绑定列出的固定提交；后续版本需要重新核对。
+This page summarizes adaptation decisions across six research categories. It draws on the source reviews and acceptance records retained at the time. The original export did not retrieve upstream materials again, rerun models, or install these projects. The judgments below apply to the listed pinned commits. Later versions require a new review.
 
-## Super-agent：把上下文、权限和执行归属分开
+## Super-agent: Separate Context, Permissions, and Execution Ownership
 
-核查对象是公开的研究原型，而非完整内部系统。固定源码中的 Router 仍持有部分执行工具。它的职责收窄依赖提示与具体守卫，不能把“Router”这个名称当作权限隔离。Worker 以操作者的系统身份运行；目录和命令包装器提供默认行为，无法建立操作系统级隔离。[固定执行说明](https://github.com/deepseek-ai/dsh-superagent-prototype/blob/6337fc823ce20251c8de8085948165c81aaa701e/docs/003-execution.md)、[会话实现](https://github.com/deepseek-ai/dsh-superagent-prototype/blob/6337fc823ce20251c8de8085948165c81aaa701e/src/app/sessions.ts)
+The review examined a public research prototype rather than the complete internal system. The Router in the pinned source still holds some execution tools. Prompts and specific guards narrow its responsibility. The name “Router” does not establish permission isolation. A Worker runs under the operator's system identity. Directory and command wrappers provide default behavior, but they do not establish operating-system isolation. [Pinned execution documentation](https://github.com/deepseek-ai/dsh-superagent-prototype/blob/6337fc823ce20251c8de8085948165c81aaa701e/docs/003-execution.md), [session implementation](https://github.com/deepseek-ai/dsh-superagent-prototype/blob/6337fc823ce20251c8de8085948165c81aaa701e/src/app/sessions.ts)
 
-可复用的部分是清楚的责任边界：同一事项优先交给已有执行者；订阅得到上下文，并不得到新的操作权限；投递、读取和完成分别记录。检查点保留下一步必需的信息，长证据保留明确引用。每次沿引用读取时，仍要检查范围。[固定授权说明](https://github.com/deepseek-ai/dsh-superagent-prototype/blob/6337fc823ce20251c8de8085948165c81aaa701e/docs/002-authorization.md)
+The reusable mechanism is a clear division of responsibility. Route the same matter to its existing executor where possible. A subscription supplies context, but grants no new operational permissions. Record delivery, reading, and completion separately. Checkpoints retain the information that the next step needs. Long evidence retains explicit references. Each read through a reference still requires a scope check. [Pinned authorization documentation](https://github.com/deepseek-ai/dsh-superagent-prototype/blob/6337fc823ce20251c8de8085948165c81aaa701e/docs/002-authorization.md)
 
-实际取舍是复用已有协调、检查点和证据记录。没有启用新的 Watchdog、定时器、云执行器或模型路由。原始长文当时受到明确的站点安全限制，完整正文与图示未读；独立公开源码核查没有补齐这项长文证据缺口。本地没有运行该原型，也没有复现它的性能结果。
+The actual decision retained the existing coordination, checkpoints, and evidence records. It did not activate another Watchdog, timer, cloud executor, or model router. Explicit site security restrictions blocked the original long article at the time. The review did not read its complete text or figures. The separate public-source review did not close that article-evidence gap. No local run executed the prototype or reproduced its performance results.
 
-## Memdoor：多角色结果必须按预算和样本解释
+## Memdoor: Interpret Multiple-Role Results by Budget and Sample
 
-Memdoor 的团队解题流程复现了 GVS5H 思路。多个全新角色实例可以减少相互锚定，但不能把同一模型的不同角色写成多个不同模型。来源中的十题、每题五次复现，与原研究的任务规模也需要分开。[Memdoor 固定流程](https://github.com/guregodevo/memdoor/blob/e6fb85e7e2aab55309d191ea56f50626edaa6193/examples/workflows/team-solve/README.md)、[GVS5H 固定说明](https://github.com/slee-persis/GVS5H/blob/b4cc2f734a28fdab6c37af48e612c4d9e40a7a20/README.md)
+Memdoor's team-solving workflow reproduces the GVS5H approach. Several fresh role instances can reduce mutual anchoring. Different roles of one model do not constitute several different models. The source's reproduction used ten questions with five runs per question. That sample requires a separate description from the task scale of the original research. [Pinned Memdoor workflow](https://github.com/guregodevo/memdoor/blob/e6fb85e7e2aab55309d191ea56f50626edaa6193/examples/workflows/team-solve/README.md), [pinned GVS5H description](https://github.com/slee-persis/GVS5H/blob/b4cc2f734a28fdab6c37af48e612c4d9e40a7a20/README.md)
 
-当时对公开完成记录的复算得到 49/50；作者对照记录为 48/50。完成记录的费用合计为 35.7914 美元。这个合计没有覆盖中断运行的所有成本，也没有提供相同预算下的完整对照，因此不能推出普遍模型优势或固定成本节省比例。本地没有复现该基准。[公开运行表](https://github.com/guregodevo/memdoor/blob/e6fb85e7e2aab55309d191ea56f50626edaa6193/examples/workflows/team-solve/bench/results/parity-5pass/runs.tsv)、[作者对照表](https://github.com/guregodevo/memdoor/blob/e6fb85e7e2aab55309d191ea56f50626edaa6193/examples/workflows/team-solve/bench/results/parity-5pass/authors.tsv)
+The historical recalculation of public completed-run records yielded 49/50. The author's comparison records yielded 48/50. The completed-run records totaled USD 35.7914. That total did not cover every cost of interrupted runs. The records also lacked a complete comparison under equal budgets. They therefore do not establish general model superiority or a fixed cost-saving percentage. No local run reproduced this benchmark. [Public run table](https://github.com/guregodevo/memdoor/blob/e6fb85e7e2aab55309d191ea56f50626edaa6193/examples/workflows/team-solve/bench/results/parity-5pass/runs.tsv), [author comparison table](https://github.com/guregodevo/memdoor/blob/e6fb85e7e2aab55309d191ea56f50626edaa6193/examples/workflows/team-solve/bench/results/parity-5pass/authors.tsv)
 
-适配时采用已有的有限角色分工、实际命令验证、独立验收和保留基线机制。没有安装共享记忆服务或切换模型。模型提出的反例应进入可执行验证；单有批评文字不能证明代码失败。评估还应保留失败、修复和未完成运行，避免只计算成功样本。
+The adaptation used the existing bounded division of roles, verification through actual commands, independent acceptance, and baseline retention. It did not install a shared-memory service or switch models. Model-proposed counterexamples should enter executable validation. Critical prose alone does not establish a code failure. Evaluation should also retain failures, repairs, and unfinished runs to avoid counting only successful samples.
 
-## Spec Kit：需求覆盖、任务勾选和行为验收各自成立
+## Spec Kit: Keep Requirements Coverage, Task Checkmarks, and Behavioral Acceptance Distinct
 
-固定版本提供规格、计划、任务、实现、分析和收敛等入口，也包含 Codex 适配文档。完整规格流程不是每次微小修改都必须采用的前提。它的分析覆盖率表示“至少有一个任务关联的需求比例”，不能代替测试覆盖率。收敛流程没有发现可操作事项，也不等于独立运行验收通过。[固定 README](https://github.com/github/spec-kit/blob/acf4b00b16159b003294afc797e0d30dd37d4b49/README.md)、[分析模板](https://github.com/github/spec-kit/blob/acf4b00b16159b003294afc797e0d30dd37d4b49/templates/commands/analyze.md)、[收敛模板](https://github.com/github/spec-kit/blob/acf4b00b16159b003294afc797e0d30dd37d4b49/templates/commands/converge.md)
+The pinned version provides entry points for specifications, plans, tasks, implementation, analysis, and convergence. It also includes Codex adaptation documentation. The complete specification workflow is not a prerequisite for every small change. Its analysis coverage means the proportion of requirements with at least one associated task. That metric does not replace test coverage. A convergence workflow with no actionable findings does not establish independent runtime acceptance. [Pinned README](https://github.com/github/spec-kit/blob/acf4b00b16159b003294afc797e0d30dd37d4b49/README.md), [analysis template](https://github.com/github/spec-kit/blob/acf4b00b16159b003294afc797e0d30dd37d4b49/templates/commands/analyze.md), [convergence template](https://github.com/github/spec-kit/blob/acf4b00b16159b003294afc797e0d30dd37d4b49/templates/commands/converge.md)
 
-可复用的是需求、任务、源码和验收证据之间的映射。已勾选任务也应接受实际证据复查。发现缺口时保留原任务标识，再追加修复项。把“尚未验证”单列出来，并给循环设置次数或成本上限。本次保留已有流程，没有安装 Spec Kit，没有改动宿主事件、项目配置或全局技能，也没有运行真实 Spec Kit 项目。
+The reusable mechanism maps requirements, tasks, source code, and acceptance evidence. Completed checkboxes still require review against actual evidence. When a gap appears, retain the original task identifier and append a repair item. List unverified items separately. Set an iteration or cost limit for the loop. The historical task retained the existing workflow. It did not install Spec Kit, change host events, project configuration, or global skills, or run a real Spec Kit project.
 
-## Understand Anything：图谱提供检查线索
+## Understand Anything: Use the Graph to Guide Inspection
 
-固定版本把文件、符号和关系组织为图谱。差异分析会寻找相邻节点，帮助安排检查顺序；这个过程没有执行程序，也没有证明相邻关系具备真实调用语义。空的影响列表不能证明修改没有影响。[固定源码树](https://github.com/Egonex-AI/Understand-Anything/tree/4e6d3299017a7432da15957874992837a315c5b4)、[差异分析实现](https://github.com/Egonex-AI/Understand-Anything/blob/4e6d3299017a7432da15957874992837a315c5b4/understand-anything-plugin/src/diff-analyzer.ts)
+The pinned version organizes files, symbols, and relationships into a graph. Its difference analysis finds adjacent nodes to help order inspections. This process does not execute the program or establish that adjacency represents an actual call relationship. An empty impact list does not establish absence of impact. [Pinned source tree](https://github.com/Egonex-AI/Understand-Anything/tree/4e6d3299017a7432da15957874992837a315c5b4), [difference-analysis implementation](https://github.com/Egonex-AI/Understand-Anything/blob/4e6d3299017a7432da15957874992837a315c5b4/understand-anything-plugin/src/diff-analyzer.ts)
 
-增量流程保留旧符号和提交基线，并校对计划与补丁中的版本标识。这些做法适合复用。与此同时，选定的完成入口没有重新核对实际工作区的全部即时内容；图谱、指纹和元数据也分别写入。单个文件的临时写入再重命名，不能代表多个文件组成一个事务。[准备入口](https://github.com/Egonex-AI/Understand-Anything/blob/4e6d3299017a7432da15957874992837a315c5b4/understand-anything-plugin/skills/understand/prepare-incremental.mjs)、[完成入口](https://github.com/Egonex-AI/Understand-Anything/blob/4e6d3299017a7432da15957874992837a315c5b4/understand-anything-plugin/skills/understand/finalize-incremental.mjs)
+The incremental workflow retains old symbols and the commit baseline. It also checks version identifiers in the plan and patch. These practices support reuse. However, the selected finalization entry point does not recheck all current content in the actual workspace. It also writes the graph, fingerprints, and metadata separately. A temporary write followed by a rename for one file does not establish a transaction across multiple files. [Preparation entry point](https://github.com/Egonex-AI/Understand-Anything/blob/4e6d3299017a7432da15957874992837a315c5b4/understand-anything-plugin/skills/understand/prepare-incremental.mjs), [finalization entry point](https://github.com/Egonex-AI/Understand-Anything/blob/4e6d3299017a7432da15957874992837a315c5b4/understand-anything-plugin/skills/understand/finalize-incremental.mjs)
 
-本次保留已有检索与源码核验方式。未来若采用图谱，应绑定源码提交和工作区状态，再用实际调用路径与测试验证候选影响。未知、陈旧和获取失败都不能显示为已确认的新鲜状态。本次只做静态核查，没有生成图谱、启动看板或验证 Codex 自动更新。
+The historical task retained the existing retrieval and source-verification methods. Any future graph adoption should bind the graph to a source commit and workspace state. Actual call paths and tests should then validate candidate impacts. Unknown, stale, and failed retrieval states must not appear as confirmed fresh data. The historical task performed only static review. It did not generate a graph, start a dashboard, or validate automatic updates in Codex.
 
-## 文件活动面板：观察提示不能代替完成证据
+## File Activity Panels: Activity Signals Do Not Establish Completion
 
-claude-files-pane v0.8.2 的固定实现依赖 Claude Code 的事件与界面接口。它没有展示可直接放入 Codex 的适配层。可跨宿主复用的机制是把工具触碰文件、真实 Git 状态和验收结果分别记录。[固定版本](https://github.com/Marius-Adam/claude-files-pane/tree/3794eea05ed1fca0d23ff5307cd89182d180c9fb)、[事件注册](https://github.com/Marius-Adam/claude-files-pane/blob/3794eea05ed1fca0d23ff5307cd89182d180c9fb/hooks/register.tsx)、[活动记录](https://github.com/Marius-Adam/claude-files-pane/blob/3794eea05ed1fca0d23ff5307cd89182d180c9fb/hooks/activity.ts)
+The pinned implementation of claude-files-pane v0.8.2 depends on Claude Code events and UI interfaces. It does not demonstrate an adapter for direct use in Codex. The transferable mechanism records tool contact with files, actual Git state, and acceptance results separately. [Pinned version](https://github.com/Marius-Adam/claude-files-pane/tree/3794eea05ed1fca0d23ff5307cd89182d180c9fb), [event registration](https://github.com/Marius-Adam/claude-files-pane/blob/3794eea05ed1fca0d23ff5307cd89182d180c9fb/hooks/register.tsx), [activity recording](https://github.com/Marius-Adam/claude-files-pane/blob/3794eea05ed1fca0d23ff5307cd89182d180c9fb/hooks/activity.ts)
 
-一个文件变色，只能提示发生了某类活动。它不能证明内容正确、提交成功或发布通过。活动列表还有容量限制，因此不能替代完整证据记录。只读面板同样不能限制原代理的写入工具。未来适配应在采集与索引之前限定项目范围，不能先采集所有项目再过滤展示。
+A file color change only indicates a type of activity. It does not establish correct content, a successful commit, or publication acceptance. The activity list also has a capacity limit. It cannot replace the complete evidence record. A read-only panel does not restrict the original agent's write tools either. Future adaptation should restrict project scope before collection and indexing. It should not collect every project first and filter only the display.
 
-当时阅读了实现与模拟测试定义，没有运行这些测试，也没有安装面板或验收真实界面。实际取舍是复用现有任务记录，不另建跨项目观察器。
+The historical review read the implementation and mock-test definitions. It did not run those tests, install the panel, or accept a real UI. The actual decision reused existing task records without creating another observer across projects.
 
-## 长任务循环：根据反馈选择复杂度
+## Loops for Long Tasks: Choose Complexity from Feedback
 
-官方工程文章支持从简单方案开始，再按任务需要加入并行分支、调度者与执行者、评价与修复。循环需要环境反馈、阶段检查点和停止条件。重复调用自身不能单独证明通用能力提升。[Building effective agents](https://www.anthropic.com/research/building-effective-agents)、[Effective harnesses for long-running agents](https://www.anthropic.com/research/effective-harnesses-for-long-running-agents)
+The official engineering articles support a simple starting point. Parallel branches, orchestrators and workers, evaluation, and repair can follow when the task requires them. A loop needs environmental feedback, stage checkpoints, and stop conditions. Repeated self-invocation alone does not establish general capability gains. [Building effective agents](https://www.anthropic.com/research/building-effective-agents), [Effective harnesses for long-running agents](https://www.anthropic.com/research/effective-harnesses-for-long-running-agents)
 
-该研究还涉及一段转述视频。完整字幕和全部传播链没有核实，因此没有采用其中的百分比或“某种架构必然替代另一种架构”的结论。适配只保留独立分支的明确输入、共享改动的单一执行者、真实结果核对，以及有限重试。没有新增后台循环、框架或任务激活规则。
+The research also involved a video that relayed these ideas. The review did not verify its full transcript or complete chain of transmission. It therefore did not adopt the video's percentages or claims that one architecture must replace another. The adaptation retained only explicit inputs for independent branches, a single executor for shared changes, checks of actual results, and bounded retries. It added no background loop, framework, or task-activation rule.
 
-## 一套可重复的取舍步骤
+## Repeatable Decision Steps
 
-先把文章中的主张拆成具体行为，再到固定源码中找到相应入口。确认宿主 API、外部请求、文件写入、后台进程和权限来源。随后判断既有流程是否已经覆盖该职责。已有覆盖时保留基线，并保存来源特有的发现。出现真实缺口时，再提出单个可回退候选。
+First, break an article's claims into specific behaviors. Then locate the corresponding entry points in pinned source. Identify host APIs, external requests, file writes, background processes, and permission sources. Next, determine whether the existing workflow already covers the responsibility. If it does, retain the baseline and record the source-specific findings. If a real gap remains, propose one candidate with a rollback path.
 
-候选测试应同时包含正常情况、失败情况和未验证情况。源码中存在测试文件、模板写有验收要求、面板显示完成，以及代理报告成功，都各自只说明对应状态。对外报告最终结果时，仍须给出实际效果与验收范围。
+Candidate tests should include normal cases, failure cases, and unverified cases. A test file in the source, an acceptance requirement in a template, a panel completion indicator, and an agent's success report each establish only their respective state. A final external report still needs actual effects and the acceptance scope.

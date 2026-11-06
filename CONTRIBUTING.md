@@ -1,28 +1,30 @@
-# 贡献与更新
+# Contributing and Updates
 
-优先更新已有主题。只有出现独立且需要持续维护的问题时，才增加新文档。
+Update an existing topic first. Add a document only when a distinct problem requires ongoing maintenance.
 
-## 提交前
+English is the primary language for the repository description, README, documentation, templates and new commit messages. Keep another language when the user explicitly requests it or a product requires that localization.
 
-1. 核对原始来源，保留固定版本或观察日期。
-2. 搜索现有目录，合并重复结论。
-3. 写清实际改动、验证范围、失败和未验项目。
-4. 检查相对链接及示例路径。
-5. 删除账号凭据、内部标识、本机路径和私人服务配置。
-6. 核对第三方引用和许可。未知许可的完整源码不进入本仓库。
+## Before submitting
 
-## 修改事实
+1. Verify the original source. Retain a pinned revision or observation date.
+2. Search the existing documents and merge duplicate conclusions.
+3. Describe actual changes, validation scope, failures and unverified items.
+4. Check relative links and example paths.
+5. Remove credentials, internal identifiers, machine-specific paths and private service configurations.
+6. Check third-party references and licenses. Keep complete source code with unknown licensing outside the repository.
 
-服务、模型或接口变化时，标明新旧版本。保留有用的历史适用条件，不把旧记录静默改成新版本已经验证。
+## Revising facts
 
-纠正错误时，说明原结论的问题和新的依据。验证失败可以成为学习成果，但必须保留失败状态。
+When a service, model or interface changes, identify both versions. Retain useful historical conditions. Do not silently present an old result as validation of a new version.
 
-## 文稿结构
+When correcting an error, explain the original problem and the new evidence. A failed validation can be a useful learning outcome. Preserve its failure status.
 
-建议使用“问题 → 来源和版本 → 方法 → 已验证结果 → 未验证范围 → 可复用结论”。
+## Document structure
 
-代码示例只表达必要步骤。默认不携带真实密钥、绝对设备路径、模型权重、大型归档或原始日志。
+Use this sequence when it fits the topic: problem, source and version, method, verified results, unverified scope, reusable conclusion.
 
-## 发布范围
+Code examples should express only the necessary steps. Keep real secrets, machine-specific absolute paths, model weights, large archives and raw logs outside examples.
 
-本仓库只发布已经逐项检查的文件。私有来源清单、工作状态和审查记录应保存在仓库之外。提交前查看完整差异，并核对实际提交文件列表。
+## Publication scope
+
+Publish only individually reviewed files. Keep private source manifests, working state and review records outside the repository. Before committing, inspect the complete diff and verify the actual file list.

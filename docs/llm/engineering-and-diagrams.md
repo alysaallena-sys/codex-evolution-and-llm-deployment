@@ -1,101 +1,101 @@
-# 把工程方法并入现有流程，并检查机制图的验收覆盖
+# Integrating Engineering Methods and Checking Diagram Acceptance Coverage
 
-本文记录两次已完成的适配：先把缺陷诊断方法并入现有技能，再把机制图的生成与验收方法并入同一入口。两次适配都没有增加全局技能。后续适配补充了 GUI 与文件工具的选择规则。
+This article records two completed adaptations. The first integrated defect diagnosis methods into an existing skill. The second integrated mechanism diagram generation and acceptance checks into the same entry point. Neither adaptation added a global skill. A later adaptation added rules for choosing between GUI and file tools.
 
-本文于 2026 年 11 月 6 日整理。整理过程只读回历史完成轮和明确命名的原件。整理过程没有重跑测试，没有启动模型，也没有修改原件。下文的通过结果均属于原任务。
+Compilation date: 2026-11-06. This compilation read only historical completion turns and explicitly named original records. It did not rerun tests, start models, or change the original records. All pass results below belong to the original tasks.
 
-## 1. 把外部方法改成可以执行的步骤
+## 1. Turn external methods into executable steps
 
-第一组方法来自 Matt Pocock 的技能库。适配固定到提交 [`49dd158d1076134a641b33efb035946536778336`](https://github.com/mattpocock/skills/tree/49dd158d1076134a641b33efb035946536778336)。适配采用了缺陷诊断、独立预期值和最小修改等规则。适配没有照搬持续访谈、跟踪器设置或重复确认流程。
+The first group of methods came from Matt Pocock's skills repository. The adaptation fixed the source at commit [`49dd158d1076134a641b33efb035946536778336`](https://github.com/mattpocock/skills/tree/49dd158d1076134a641b33efb035946536778336). It adopted defect diagnosis, independent expected results, and minimal changes. It did not copy continuous interviews, tracker setup, or repeated confirmation procedures.
 
-实际采用的步骤如下。
+The adopted steps were as follows.
 
-1. **先捕获指定故障。** 让检查命令经过真实故障路径。断言必须指向用户报告的症状。间歇性故障还需要记录尝试次数和失败次数。
-2. **再缩小复现条件。** 每次只删除一个输入或步骤。每次检查都要保留同一症状。
-3. **为原因写出预测。** 每个候选原因都要给出一个探针可以推翻的预测。每次探针只改变一个因素。
-4. **独立取得预期值。** 从明确的原实现、规范或独立算例取得预期值。断言不能再次计算被测实现的公式。
-5. **每轮只修改一个已观察行为。** 复用现有接口。只有具体变化或隔离需求才支持新增抽象。检查调用者可以观察到的顺序、错误和副作用。
-6. **修复后检查两条路径。** 重跑原始场景。再重跑缩小后的回归场景。删除临时探针。保留首次失败和最终结果。
+1. **Capture the specified failure first.** Run the check through the actual failure path. The assertion must address the symptom that the user reported. For intermittent failures, record both the attempt count and the failure count.
+2. **Reduce the reproduction conditions.** Remove only one input or step at a time. Each check must preserve the same symptom.
+3. **Write a prediction for each proposed cause.** Each candidate cause must produce a prediction that a probe can disprove. Each probe changes only one factor.
+4. **Obtain expected results independently.** Use an identified original implementation, a specification, or an independent worked example. Assertions must not recalculate the formula from the implementation under test.
+5. **Change only one observed behavior per iteration.** Reuse existing interfaces. Add an abstraction only for a specific variation or isolation requirement. Check the order, errors, and side effects that callers can observe.
+6. **Check both paths after the fix.** Rerun the original scenario. Then rerun the reduced regression scenario. Delete temporary probes. Retain the first failure and the final result.
 
-缺少运行环境时，研究仍可继续。此时应保存静态发现，并把原因标为暂定。静态推理不能代替真实故障复现。
+Research can continue without a runtime environment. In that case, retain static findings and mark proposed causes as provisional. Static reasoning does not replace reproduction of the actual failure.
 
-原任务在现有技能中写入了这些规则。结构检查通过。独立检查覆盖了数值缺陷场景和缺少运行环境的研究场景。这些检查没有证明未来所有工程任务都能得到改善。
+The original task added these rules to an existing skill. Structure checks passed. Independent checks covered a numerical defect scenario and a research scenario without a runtime environment. These checks did not establish improvements for all future engineering tasks.
 
-方法出处：[缺陷诊断](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/diagnosing-bugs/SKILL.md)、[测试方法](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/tdd/SKILL.md)、[代码库设计](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/codebase-design/SKILL.md)。本文只提供适配后的说明，不分发上游技能原文。
+Method sources: [defect diagnosis](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/diagnosing-bugs/SKILL.md), [testing methods](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/tdd/SKILL.md), and [codebase design](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/codebase-design/SKILL.md). This article explains the adapted methods. It does not distribute the upstream skill text.
 
-## 2. 用一张机制图检验画图流程
+## 2. Test the diagram workflow with one mechanism diagram
 
-图稿试验使用了 `diagram-design` 的固定提交 [`550fd66edff058bc73056c3416b76d69cfe865ba`](https://github.com/cathrynlavery/diagram-design/tree/550fd66edff058bc73056c3416b76d69cfe865ba)。原任务使用了上游浅色模板、流程图规则、离线检查器、几何检查器和 SVG 导出脚本。原任务保持了上游检查脚本的内容。
+The diagram experiment used `diagram-design` at fixed commit [`550fd66edff058bc73056c3416b76d69cfe865ba`](https://github.com/cathrynlavery/diagram-design/tree/550fd66edff058bc73056c3416b76d69cfe865ba). The original task used the upstream light theme template, flowchart rules, offline checker, geometry checker, and SVG export script. It retained the contents of the upstream checking scripts.
 
-试验只制作了一张静态数值流程图。图稿说明同一输入在两个已记录控制状态下为何对应 `149` 和 `150`。这两个结果来自既有函数级记录。画图任务没有重新执行原函数，也没有启动完整游戏。
+The experiment produced one static numerical flowchart. The diagram explained why the same input corresponded to `149` and `150` under two recorded control states. Those results came from existing function-level records. The diagram task did not rerun the original function or start the full game.
 
-实际采用的生成与验收步骤如下。
+The generation and acceptance steps were as follows.
 
-| 步骤 | 执行动作 | 保留的证据 |
+| Step | Action | Retained evidence |
 | --- | --- | --- |
-| 绑定内容 | 按输入、转换、分支和结果选择节点；为数值和状态标明来源 | 原始数值记录与图稿预期 |
-| 固定交付 | 生成独立 HTML 与内联 SVG；使用系统字体 | 离线资源检查与最终文件 |
-| 检查结构 | 检查可访问名称、描述和画布边界 | 检查输出与退出码 |
-| 检查几何 | 检查连线路径；另行比较预期连线数与识别连线数 | 几何结果与覆盖计数 |
-| 检查检查器 | 注入缺少描述、斜线和错误数值三个反例 | 每个反例的失败结果 |
-| 检查渲染 | 检查文字边界、节点布局和窄屏滚动 | 浏览器测量与截图 |
-| 绑定版本 | 为最终 HTML 与 SVG 计算哈希 | 文件身份与浏览器回执的对应关系 |
+| Bind content to sources | Select nodes for inputs, transformations, branches, and results; identify sources for values and states | Original numerical records and expected diagram content |
+| Fix the deliverables | Generate standalone HTML with inline SVG; use system fonts | Offline resource checks and final files |
+| Check structure | Check accessible names, descriptions, and canvas bounds | Check output and exit codes |
+| Check geometry | Check connection paths; separately compare expected and detected connection counts | Geometry results and coverage counts |
+| Check the checkers | Inject three deliberate faults: a missing description, a diagonal line, and an incorrect value | Failure results for each faulty example |
+| Check rendering | Check text bounds, node layout, and scrolling in a narrow viewport | Browser measurements and screenshots |
+| Bind evidence to the version | Calculate hashes for the final HTML and SVG | Correspondence between file identities and browser receipts |
 
-原任务记录了 **17/17 项检查通过**。独立代理复跑检查后取得相同结果。该复跑使用了已保留的浏览器回执，没有重新操作浏览器。
+The original task recorded **17/17 checks passed**. An independent agent reran the checks and obtained the same result. That rerun used retained browser receipts. It did not operate the browser again.
 
-桌面检查确认了文字边界。窄屏检查请求了 390 像素视口，并确认键盘滚动可以完整显示右侧结果。浏览器内容区实测为 375 像素，图稿容器实测为 343 像素。请求尺寸和实际内容区尺寸应分别记录。这个结果没有经过真实手机验收。
+The desktop check confirmed text bounds. The narrow viewport check requested a width of 390 pixels and confirmed that keyboard scrolling could reveal the complete result on the right. The measured browser content width was 375 pixels. The measured diagram container width was 343 pixels. Records must distinguish the requested dimensions from the actual content area dimensions. This result did not include acceptance on a physical phone.
 
-## 3. 零告警之前，先确认检查器识别了对象
+## 3. Confirm object detection before trusting zero warnings
 
-首次试验保留了一个重要漏检。图稿把 `marker-end` 写在父 `<g>` 元素上。浏览器正确显示了继承的箭头。固定版本的几何检查器却没有解析这项继承。
+The initial experiment retained an important missed detection. The diagram placed `marker-end` on a parent `<g>` element. The browser correctly displayed the inherited arrows. The fixed version of the geometry checker did not resolve that inheritance.
 
-因此，检查器对故意画斜线的图稿给出了以下结果：
+The checker therefore returned these results for a diagram with deliberately diagonal lines:
 
-| 观察项 | 首次结果 |
+| Observation | Initial result |
 | --- | --- |
-| 预期连线数 | 6 |
-| 检查器识别连线数 | 0 |
-| 检查器报告问题数 | 0 |
-| 检查器退出码 | 0 |
+| Expected connections | 6 |
+| Connections detected by the checker | 0 |
+| Problems reported by the checker | 0 |
+| Checker exit code | 0 |
 
-退出码为 0 只表示该检查没有报告问题。它没有证明检查器覆盖了图中的连线。
+Exit code 0 meant only that the check reported no problems. It did not establish coverage of the diagram's connections.
 
-适配采用了两项措施。第一项措施在每条连线上显式声明箭头标记。第二项措施增加覆盖门槛：预期连线数必须等于检查器识别连线数。最终图稿满足 `expected=6`、`detected=6`。带显式标记的斜线反例随后返回退出码 1。覆盖门槛也正确拒绝了原先识别出 0 条连线的样本。
+The adaptation introduced two measures. First, each connection explicitly declared its arrow marker. Second, a coverage gate required the expected connection count to equal the detected count. The final diagram met `expected=6` and `detected=6`. The diagonal-line example with explicit markers then returned exit code 1. The coverage gate also correctly rejected the earlier sample with 0 detected connections.
 
-后续技能整合记录了 **10/10 项检查通过**。独立代理从更新后的入口执行检查。代理拒绝了首次漏检图稿，并接受了最终图稿的有限结论。此次整合没有新增浏览器、游戏或原函数运行。
+The later skill integration recorded **10/10 checks passed**. An independent agent ran checks from the updated entry point. The agent rejected the initial diagram with missed detections and accepted the limited conclusions for the final diagram. This integration added no browser session, game execution, or execution of the original function.
 
-节点覆盖还有另一项限制。图稿共有 **7 个语义节点**。几何检查器只使用矩形启发式，并识别了 **6 个带显式描边的矩形**。它没有把决策菱形纳入节点检查。因此，早期答复中的“覆盖全部 7 个节点”表述过宽。公开结论应采用后续收窄结果：**6 条连线全部识别；菱形和文字仍需浏览器检查。**
+Node coverage had a separate limitation. The diagram contained **7 semantic nodes**. The geometry checker used only a rectangle heuristic and recognized **6 rectangles with explicit strokes**. It did not include the decision diamond in its node checks. The early claim of “coverage of all 7 nodes” therefore exceeded the evidence. The public conclusion follows the later, narrower result: **the checker recognized all 6 connections; the diamond and text still require browser checks.**
 
-这个案例支持一项可复用规则：每个自动检查都应同时记录问题数和实际覆盖对象数。至少一个故意错误的样本应触发失败。几何检查、内容检查和实际渲染分别承担不同的验收责任。
+This case supports a reusable rule: record both the problem count and the count of objects that each automated check actually covered. At least one deliberately incorrect sample must trigger a failure. Geometry checks, content checks, and actual rendering each serve different acceptance purposes.
 
-## 4. 按任务要求选择 GUI 或文件工具
+## 4. Select GUI or file tools according to the task
 
-后续方法研究采用了 Microsoft Mage 的固定提交 [`d213d430de4875c4c5c90e84b792410f704c8a23`](https://github.com/microsoft/Mage/tree/d213d430de4875c4c5c90e84b792410f704c8a23)。本地适配采用的是操作分工与验收方法。适配没有安装或运行 Mage。
+The later method study used Microsoft Mage at fixed commit [`d213d430de4875c4c5c90e84b792410f704c8a23`](https://github.com/microsoft/Mage/tree/d213d430de4875c4c5c90e84b792410f704c8a23). The local adaptation adopted task allocation and acceptance methods. It did not install or run Mage.
 
-实际写入现有流程的规则包括：
+The rules added to the existing workflow included the following:
 
-- 用户指定浏览器或 GUI 时，保留指定操作路径。
-- 任务允许直接编辑结构化文件时，可以使用专业库、API 或连接器。
-- 检查文件语义时，读回数值、公式和保存内容。
-- 检查网页行为时，在实际会话中执行交互。
-- 检查图表和排版时，查看实际渲染。
-- 检查持久化时，按任务要求保存、退出并重新打开。
-- 比较流程用时时，固定输入、初始状态、工具权限和计时口径。
+- Preserve the specified interaction path when the user requires a browser or GUI.
+- Use specialist libraries, APIs, or connectors when the task permits direct editing of structured files.
+- Read back values, formulas, and saved content when checking file semantics.
+- Perform interactions in the actual session when checking web behavior.
+- Inspect actual rendering when checking charts and layout.
+- Save, exit, and reopen as the task requires when checking persistence.
+- Fix the input, initial state, tool permissions, and timing method when comparing completion times.
 
-截图相同不能证明文件值正确。文件值正确不能证明布局正确。工具权限不同的演示可以说明流程差异，但不能单独衡量模型能力。
+Matching screenshots do not establish correct file values. Correct file values do not establish correct layout. Demonstrations with different tool permissions can illustrate workflow differences. They cannot independently measure model capability.
 
-这次适配修改了两个现有技能的三个文件。原任务记录了两项格式检查、三个文件引用检查、五个情景决策和十五条情景判据通过。首次格式检查因缺少 PyYAML 失败。原任务改用已有环境后通过检查。原任务没有为此安装依赖。
+This adaptation changed three files across two existing skills. The original task recorded passes for two format checks, three file reference checks, five scenario decisions, and fifteen scenario criteria. The first format check failed because PyYAML was missing. The original task then used an existing environment and passed the check. It did not install dependencies for this purpose.
 
-上述结果覆盖格式、引用和情景决策。它们没有覆盖真实网页业务、应用业务、模型推理或设备效果。[Mage 的架构与评测说明](https://github.com/microsoft/Mage/blob/d213d430de4875c4c5c90e84b792410f704c8a23/mage_vl_cowork/README.md)提供了方法来源；本地通过结果来自历史适配回执。
+Those results cover formatting, references, and scenario decisions. They do not cover actual web workflows, application workflows, model inference, or device outcomes. [Mage's architecture and evaluation documentation](https://github.com/microsoft/Mage/blob/d213d430de4875c4c5c90e84b792410f704c8a23/mage_vl_cowork/README.md) supplies the method source. The local pass results come from historical adaptation receipts.
 
-## 5. 验证范围
+## 5. Verification scope
 
-| 证据层 | 已完成内容 | 结论边界 |
+| Evidence level | Completed work | Conclusion limit |
 | --- | --- | --- |
-| 上游来源 | 原任务固定了工程方法、画图工具与 Mage 的代码版本 | 本次整理没有重新核对当前上游 |
-| 本地静态 | 原任务核对了来源身份、技能结构、引用、图稿内容和文件哈希 | 不证明未来技能执行效果 |
-| 脚本与反例 | 原任务保留了 17/17 与 10/10 检查，以及首次漏检和修复 | 不证明检查器支持全部 SVG 特性 |
-| 浏览器 | 原任务保存了这一张图稿的桌面与窄屏测量 | 不覆盖真实手机、其他图型或动画 |
-| 实际业务 | 后续规则适配通过了情景决策检查 | 没有新增真实应用或模型运行验收 |
+| Upstream sources | The original tasks fixed code versions for the engineering methods, diagram tools, and Mage | This compilation did not recheck current upstream sources |
+| Local static checks | The original tasks checked source identity, skill structure, references, diagram content, and file hashes | These checks do not establish the effectiveness of future skill execution |
+| Scripts and deliberate failure cases | The original tasks retained the 17/17 and 10/10 results, the initial missed detection, and the correction | These results do not establish checker support for all SVG features |
+| Browser | The original task retained desktop and narrow viewport measurements for this one diagram | The results do not cover physical phones, other diagram types, or animation |
+| Actual workflows | The later rule adaptation passed scenario decision checks | It added no acceptance result for an actual application or model execution |
 
-本文没有把早期十项目探索当作十个项目的运行验收。本文也没有重新验收本地模型、模型引擎、完整游戏、品牌导入或完整插件集成。原件和完整哈希留在私有证据清单中。公开稿只保留方法、固定来源和适用范围。
+This article does not treat the early exploration of ten projects as runtime acceptance of ten projects. It also did not repeat acceptance checks for local models, inference engines, the full game, brand imports, or full plugin integration. Original records and complete hashes remain in the private evidence inventory. The public article retains only methods, fixed sources, and applicability limits.
